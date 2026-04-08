@@ -1,648 +1,697 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BiasHounds — AI Cognitive Bias in Media</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>BiasHounds — AI Cognitive Bias Observatory | RAISE-26</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
   <style>
-    /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --navy:      #0f1c3f;
-      --navy-mid:  #1b3168;
-      --navy-light:#2d4a8a;
-      --gold:      #d4a017;
-      --gold-light:#f0c040;
-      --cream:     #f7f5ef;
-      --white:     #ffffff;
-      --text:      #1a1a2e;
-      --text-muted:#6b7280;
-      --border:    #dde1ea;
-      --red:       #c0392b;
-      --green:     #27ae60;
-      --teal:      #0d7377;
-    }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Georgia', serif;
-      background: var(--cream);
-      color: var(--text);
-      line-height: 1.7;
-    }
-    h1,h2,h3,h4 { font-family: 'Georgia', serif; }
 
-    /* ── Nav ── */
+    :root {
+      --ink:        #0d0f14;
+      --ink2:       #1a1f2e;
+      --ink3:       #252d42;
+      --gold:       #c8a84b;
+      --gold-light: #e8c96a;
+      --gold-pale:  #f5e6b8;
+      --cream:      #faf8f2;
+      --warm-gray:  #f0ece0;
+      --steel:      #8892a4;
+      --text:       #1a1a2e;
+      --muted:      #6b7385;
+      --border:     rgba(200,168,75,0.2);
+      --red:        #b03a2e;
+      --green:      #1e7e45;
+      --blue-mid:   #2c5282;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--ink);
+      color: var(--cream);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
     nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: var(--navy);
-      border-bottom: 2px solid var(--gold);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      background: rgba(13,15,20,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2rem; height: 56px;
+      padding: 0 2.5rem; height: 58px;
     }
     .nav-brand {
-      color: var(--gold); font-weight: bold; font-size: 1.1rem;
-      letter-spacing: 0.04em;
+      font-family: 'Space Mono', monospace;
+      color: var(--gold); font-size: 0.95rem; letter-spacing: 0.08em;
+      display: flex; align-items: center; gap: 0.5rem;
     }
-    .nav-links { display: flex; gap: 1.6rem; }
+    .nav-brand span { color: rgba(255,255,255,0.5); font-weight: 400; font-size: 0.78rem; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
     .nav-links a {
-      color: rgba(255,255,255,0.8); text-decoration: none;
-      font-size: 0.85rem; font-family: Calibri, sans-serif;
-      letter-spacing: 0.05em; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); text-decoration: none;
+      font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
       transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--gold-light); }
+    .nav-cta {
+      background: var(--gold); color: var(--ink) !important;
+      padding: 0.4rem 1rem; border-radius: 3px;
+      font-weight: 600; transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--gold-light) !important; color: var(--ink) !important; }
 
-    /* ── Hero ── */
+    /* ── HERO ── */
     #hero {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1a3a6e 100%);
-      min-height: 100vh; display: flex; flex-direction: column;
+      min-height: 100vh;
+      background: var(--ink);
+      display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      text-align: center; padding: 7rem 2rem 4rem;
-      position: relative; overflow: hidden;
+      padding: 8rem 2rem 5rem;
+      position: relative; overflow: hidden; text-align: center;
     }
-    #hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background-image: radial-gradient(circle at 20% 50%, rgba(212,160,23,0.07) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(45,74,138,0.4) 0%, transparent 50%);
+    .hero-grid-bg {
+      position: absolute; inset: 0; opacity: 0.04;
+      background-image:
+        linear-gradient(rgba(200,168,75,0.6) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,168,75,0.6) 1px, transparent 1px);
+      background-size: 48px 48px;
     }
-    .hero-tag {
-      display: inline-block;
-      background: rgba(212,160,23,0.15);
-      border: 1px solid rgba(212,160,23,0.4);
-      color: var(--gold-light);
-      font-family: Calibri, sans-serif;
-      font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
-      padding: 0.3rem 1rem; border-radius: 2px;
-      margin-bottom: 1.5rem; position: relative;
+    .hero-glow {
+      position: absolute; top: 30%; left: 50%; transform: translate(-50%,-50%);
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse, rgba(200,168,75,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1.5rem; position: relative;
+      display: inline-flex; align-items: center; gap: 0.8rem;
+    }
+    .hero-eyebrow::before, .hero-eyebrow::after {
+      content: ''; display: block; width: 40px; height: 1px; background: var(--gold); opacity: 0.5;
     }
     #hero h1 {
-      color: var(--white); font-size: clamp(2rem, 5vw, 3.4rem);
-      line-height: 1.2; max-width: 780px;
-      position: relative;
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.6rem, 5.5vw, 4.2rem);
+      line-height: 1.1; max-width: 820px; position: relative;
+      color: var(--cream);
     }
-    #hero h1 span { color: var(--gold-light); }
-    .hero-subtitle {
-      color: rgba(255,255,255,0.7); font-family: Calibri, sans-serif;
-      font-size: clamp(1rem, 2vw, 1.2rem); max-width: 620px;
-      margin: 1.5rem auto 0; line-height: 1.6; position: relative;
+    #hero h1 em {
+      font-style: italic; color: var(--gold-light);
     }
-    .hero-stats {
-      display: flex; gap: 2.5rem; margin-top: 3.5rem;
-      flex-wrap: wrap; justify-content: center; position: relative;
+    .hero-sub {
+      color: var(--steel); font-size: 1.05rem; max-width: 560px;
+      margin: 1.8rem auto 0; line-height: 1.7; position: relative;
     }
-    .hero-stat {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 6px; padding: 1.2rem 2rem; text-align: center;
-      min-width: 150px;
+    .hero-numbers {
+      display: flex; gap: 0; margin-top: 4rem; position: relative;
+      border: 1px solid var(--border); border-radius: 6px;
+      overflow: hidden; background: rgba(255,255,255,0.02);
     }
-    .hero-stat .stat-num {
-      color: var(--gold-light); font-size: 2rem; font-weight: bold;
-      display: block;
+    .hero-num {
+      flex: 1; padding: 1.4rem 2rem; text-align: center;
+      border-right: 1px solid var(--border);
     }
-    .hero-stat .stat-label {
-      color: rgba(255,255,255,0.6); font-family: Calibri, sans-serif;
-      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;
-      margin-top: 0.2rem;
-    }
-    .scroll-hint {
-      position: relative; margin-top: 3rem;
-      color: rgba(255,255,255,0.4); font-size: 0.8rem;
-      font-family: Calibri, sans-serif; letter-spacing: 0.1em;
-      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-    }
-    .scroll-arrow {
-      width: 20px; height: 20px;
-      border-right: 2px solid rgba(255,255,255,0.3);
-      border-bottom: 2px solid rgba(255,255,255,0.3);
-      transform: rotate(45deg);
-      animation: bounce 1.5s infinite;
-    }
-    @keyframes bounce {
-      0%,100% { transform: rotate(45deg) translateY(0); }
-      50% { transform: rotate(45deg) translateY(5px); }
-    }
-
-    /* ── Sections ── */
-    section { padding: 5rem 2rem; }
-    .container { max-width: 1060px; margin: 0 auto; }
-    .section-label {
-      font-family: Calibri, sans-serif;
-      font-size: 0.75rem; text-transform: uppercase;
-      letter-spacing: 0.15em; color: var(--gold);
-      margin-bottom: 0.6rem;
-    }
-    .section-title {
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      color: var(--navy); line-height: 1.3; margin-bottom: 1rem;
-    }
-    .section-desc {
-      color: var(--text-muted); font-family: Calibri, sans-serif;
-      font-size: 1.05rem; max-width: 680px; margin-bottom: 2.5rem;
-    }
-
-    /* ── About / Team ── */
-    #about { background: var(--white); }
-    .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 1.5rem; margin-top: 2rem; }
-    .team-card {
-      background: var(--cream); border-left: 4px solid var(--gold);
-      border-radius: 4px; padding: 1.5rem;
-    }
-    .team-card h3 { color: var(--navy); font-size: 1.05rem; margin-bottom: 0.3rem; }
-    .team-card p { font-family: Calibri, sans-serif; font-size: 0.9rem; color: var(--text-muted); }
-    .approach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 1.2rem; margin-top: 2rem; }
-    .approach-card {
-      background: var(--navy); color: var(--white);
-      border-radius: 6px; padding: 1.4rem; position: relative;
-      overflow: hidden;
-    }
-    .approach-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0;
-      height: 3px; background: var(--gold);
-    }
-    .approach-card h3 { font-size: 0.95rem; color: var(--gold-light); margin-bottom: 0.5rem; }
-    .approach-card p { font-family: Calibri, sans-serif; font-size: 0.85rem; color: rgba(255,255,255,0.75); line-height: 1.5; }
-
-    /* ── Findings ── */
-    .finding-section { border-top: 3px solid var(--border); }
-    .finding-header {
-      background: var(--navy);
-      padding: 2.5rem 2rem;
-    }
-    .finding-header .finding-num {
-      font-family: Calibri, sans-serif; font-size: 0.75rem;
-      text-transform: uppercase; letter-spacing: 0.15em;
-      color: var(--gold); margin-bottom: 0.5rem;
-    }
-    .finding-header h2 {
-      color: var(--white); font-size: clamp(1.4rem, 2.5vw, 1.9rem);
-    }
-    .finding-header p {
-      color: rgba(255,255,255,0.65); font-family: Calibri, sans-serif;
-      font-size: 1rem; margin-top: 0.6rem; max-width: 620px;
-    }
-
-    /* Big stat callouts */
-    .stat-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 2rem 0; }
-    .big-stat {
-      flex: 1; min-width: 150px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-top: 4px solid var(--gold);
-      border-radius: 4px; padding: 1.5rem;
-      text-align: center;
-    }
-    .big-stat .num {
-      font-size: 2.6rem; font-weight: bold;
-      color: var(--navy-mid); display: block; line-height: 1;
-    }
-    .big-stat .unit { font-size: 1rem; color: var(--text-muted); }
-    .big-stat .label {
-      font-family: Calibri, sans-serif; font-size: 0.82rem;
-      color: var(--text-muted); margin-top: 0.5rem;
-      text-transform: uppercase; letter-spacing: 0.06em;
-    }
-
-    /* Chart containers */
-    .chart-wrap {
-      background: var(--white); border: 1px solid var(--border);
-      border-radius: 6px; padding: 1.5rem; margin: 1.5rem 0;
-    }
-    .chart-title {
-      font-family: Calibri, sans-serif; font-weight: bold;
-      font-size: 0.9rem; color: var(--navy); margin-bottom: 1rem;
-      text-transform: uppercase; letter-spacing: 0.06em;
-    }
-    .chart-subtitle {
-      font-family: Calibri, sans-serif; font-size: 0.8rem;
-      color: var(--text-muted); margin-top: -0.8rem; margin-bottom: 1rem;
-    }
-    .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    @media (max-width: 700px) { .chart-row { grid-template-columns: 1fr; } }
-    canvas { max-height: 340px; }
-
-    /* Insight callout boxes */
-    .insight {
-      background: #fffbeb; border-left: 4px solid var(--gold);
-      padding: 1rem 1.2rem; border-radius: 0 4px 4px 0;
-      margin: 1.5rem 0; font-family: Calibri, sans-serif; font-size: 0.95rem;
-    }
-    .insight strong { color: var(--navy); }
-    .insight-red {
-      background: #fff5f5; border-left-color: var(--red);
-    }
-    .insight-red strong { color: var(--red); }
-
-    /* Bias tags */
-    .bias-list { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.5rem 0; }
-    .bias-tag {
-      display: flex; align-items: center; gap: 0.5rem;
-      background: var(--navy); color: var(--white);
-      border-radius: 4px; padding: 0.5rem 0.9rem;
-      font-family: Calibri, sans-serif; font-size: 0.82rem;
-    }
-    .bias-tag .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--gold-light); flex-shrink: 0;
-    }
-
-    /* Examples */
-    .examples { margin: 1.5rem 0; }
-    .example-card {
-      background: var(--white); border: 1px solid var(--border);
-      border-radius: 4px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;
-      display: flex; gap: 1rem; align-items: flex-start;
-      font-family: Calibri, sans-serif;
-    }
-    .example-score {
-      background: var(--red); color: var(--white);
-      font-size: 0.78rem; font-weight: bold;
-      padding: 0.3rem 0.5rem; border-radius: 3px;
-      white-space: nowrap; align-self: center;
-    }
-    .example-score.low { background: var(--green); }
-    .example-text { font-size: 0.92rem; color: var(--text); }
-
-    /* Correlation table */
-    .corr-table {
-      width: 100%; border-collapse: collapse;
-      font-family: Calibri, sans-serif; font-size: 0.88rem;
-      margin: 1rem 0;
-    }
-    .corr-table th {
-      background: var(--navy); color: var(--white);
-      padding: 0.6rem 1rem; text-align: left;
-      font-weight: normal; letter-spacing: 0.04em;
-    }
-    .corr-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--border); }
-    .corr-table tr:nth-child(even) td { background: #f4f6fa; }
-    .corr-bar {
-      display: inline-block; height: 8px;
-      background: var(--navy-mid); border-radius: 2px;
-      vertical-align: middle; margin-left: 0.5rem;
-    }
-
-    /* Invisible human grid */
-    .human-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1rem; margin: 1.5rem 0; }
-    .human-card {
-      background: var(--white); border: 1px solid var(--border);
-      border-radius: 4px; padding: 1.2rem; text-align: center;
-    }
-    .human-card .pct {
-      font-size: 2rem; font-weight: bold;
+    .hero-num:last-child { border-right: none; }
+    .hero-num .n {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem; color: var(--gold-light);
       display: block; line-height: 1;
     }
-    .human-card .pct.low { color: var(--red); }
-    .human-card .pct.high { color: var(--green); }
-    .human-card .topic {
-      font-family: Calibri, sans-serif; font-size: 0.85rem;
-      color: var(--text-muted); margin-top: 0.3rem;
+    .hero-num .l {
+      font-size: 0.72rem; color: var(--steel); text-transform: uppercase;
+      letter-spacing: 0.08em; margin-top: 0.4rem;
     }
-    .human-card .missing {
-      font-family: Calibri, sans-serif; font-size: 0.75rem;
-      color: var(--text-muted); margin-top: 0.5rem;
-      font-style: italic;
+    .scroll-cue {
+      position: relative; margin-top: 3.5rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      color: rgba(255,255,255,0.2); font-size: 0.72rem;
+      font-family: 'Space Mono', monospace; letter-spacing: 0.1em;
+    }
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, rgba(200,168,75,0.6), transparent);
+      animation: drip 1.8s ease-in-out infinite;
+    }
+    @keyframes drip { 0%,100% { transform: scaleY(1); opacity:1; } 50% { transform: scaleY(0.5); opacity:0.3; } }
+
+    /* ── SECTIONS ── */
+    section { padding: 6rem 2rem; }
+    .container { max-width: 1080px; margin: 0 auto; }
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.7rem;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1.2;
+      color: var(--cream); margin-bottom: 1rem;
+    }
+    .section-desc {
+      color: var(--steel); font-size: 1rem; max-width: 600px; margin-bottom: 3rem;
+    }
+    .divider {
+      width: 48px; height: 2px;
+      background: linear-gradient(to right, var(--gold), transparent);
+      margin: 1.2rem 0;
     }
 
-    /* Implications */
-    #implications { background: var(--white); }
-    .impl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1.2rem; margin-top: 2rem; }
-    .impl-card {
+    /* ── LINK HUB ── */
+    #hub {
+      background: var(--ink2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 2.5rem;
+    }
+    .hub-card {
+      background: var(--ink2);
+      padding: 2rem 1.8rem;
+      display: flex; flex-direction: column;
+      gap: 0.6rem; text-decoration: none;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .hub-card:hover { background: rgba(200,168,75,0.06); }
+    .hub-icon {
+      width: 40px; height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; margin-bottom: 0.4rem;
+    }
+    .hub-card h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1rem; color: var(--cream);
+    }
+    .hub-card p {
+      font-size: 0.8rem; color: var(--steel); line-height: 1.5;
+    }
+    .hub-card .hub-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem; color: var(--gold);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-top: auto; padding-top: 0.8rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .hub-tag::after { content: '→'; }
+    .hub-card.disabled { opacity: 0.4; cursor: not-allowed; }
+    .hub-card.disabled:hover { background: var(--ink2); }
+    .hub-card.disabled .hub-tag::after { content: '(private)'; }
+
+    /* ── TEAM / ABOUT ── */
+    #about { background: var(--ink); }
+    .team-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 3rem; }
+    .team-card {
+      border: 1px solid var(--border);
+      border-radius: 6px; padding: 1.8rem;
+      background: rgba(255,255,255,0.02);
+    }
+    .team-card .tc-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem; color: var(--cream); margin-bottom: 0.3rem;
+    }
+    .team-card .tc-deg { font-size: 0.85rem; color: var(--gold); margin-bottom: 0.2rem; }
+    .team-card .tc-minor { font-size: 0.8rem; color: var(--steel); }
+    .framework-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .fw-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--gold);
+      border-radius: 4px; padding: 1.4rem;
+    }
+    .fw-card h3 { font-size: 0.85rem; color: var(--gold-light); margin-bottom: 0.5rem; font-weight: 600; }
+    .fw-card p { font-size: 0.82rem; color: var(--steel); line-height: 1.5; }
+
+    /* ── FINDINGS ── */
+    .finding-block { border-top: 1px solid var(--border); }
+    .finding-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.5rem;
+    }
+    .stat-strip {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+      gap: 1px; background: var(--border);
       border: 1px solid var(--border); border-radius: 6px;
-      padding: 1.4rem; background: var(--cream);
+      overflow: hidden; margin: 2rem 0;
     }
-    .impl-card h3 {
-      font-family: Calibri, sans-serif; font-size: 0.78rem;
-      text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--gold); margin-bottom: 0.8rem;
+    .stat-cell {
+      background: var(--ink2); padding: 1.4rem 1.2rem; text-align: center;
     }
-    .impl-card ul { list-style: none; }
-    .impl-card li {
-      font-family: Calibri, sans-serif; font-size: 0.88rem;
-      color: var(--text-muted); padding: 0.3rem 0 0.3rem 1.2rem;
-      position: relative;
+    .stat-cell .sv {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.2rem; color: var(--gold-light);
+      display: block; line-height: 1;
     }
-    .impl-card li::before { content: '→'; position: absolute; left: 0; color: var(--gold); }
+    .stat-cell .sl {
+      font-size: 0.73rem; color: var(--steel);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-top: 0.4rem;
+    }
+    .chart-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 6px; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .chart-card .cc-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.3rem;
+    }
+    .chart-card .cc-sub {
+      font-size: 0.8rem; color: var(--steel); margin-bottom: 1.2rem;
+    }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    canvas { max-height: 320px; }
+    .callout {
+      background: rgba(200,168,75,0.06);
+      border-left: 3px solid var(--gold);
+      padding: 1rem 1.3rem; border-radius: 0 4px 4px 0;
+      font-size: 0.9rem; color: var(--cream); margin: 1.5rem 0; line-height: 1.6;
+    }
+    .callout.red { border-left-color: #c0392b; background: rgba(192,57,43,0.06); }
+    .callout strong { color: var(--gold-light); }
+    .callout.red strong { color: #e87f74; }
 
-    /* Recommendations */
-    #recommendations { background: var(--navy); }
-    #recommendations .section-title { color: var(--white); }
-    #recommendations .section-desc { color: rgba(255,255,255,0.6); }
-    .rec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 1.2rem; margin-top: 2rem; }
-    .rec-card {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 6px; padding: 1.5rem;
-    }
-    .rec-card h3 { color: var(--gold-light); font-size: 0.95rem; margin-bottom: 0.8rem; }
-    .rec-card ul { list-style: none; }
-    .rec-card li {
-      font-family: Calibri, sans-serif; font-size: 0.87rem;
-      color: rgba(255,255,255,0.7); padding: 0.3rem 0 0.3rem 1.2rem;
-      position: relative; border-bottom: 1px solid rgba(255,255,255,0.07);
-    }
-    .rec-card li:last-child { border-bottom: none; }
-    .rec-card li::before { content: '✓'; position: absolute; left: 0; color: var(--gold); font-size: 0.8rem; }
-
-    /* Footer */
-    footer {
-      background: #080f22; color: rgba(255,255,255,0.45);
-      text-align: center; padding: 2rem;
-      font-family: Calibri, sans-serif; font-size: 0.82rem;
-    }
-    footer strong { color: var(--gold); }
-
-    /* Interactive: tabs */
-    .tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
+    /* Tabs */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
     .tab-btn {
       background: none; border: none; cursor: pointer;
-      font-family: Calibri, sans-serif; font-size: 0.88rem;
-      color: var(--text-muted); padding: 0.6rem 1.2rem;
-      border-bottom: 3px solid transparent; margin-bottom: -2px;
-      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      color: var(--steel); padding: 0.7rem 1.3rem;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: all 0.2s; letter-spacing: 0.02em;
     }
-    .tab-btn.active {
-      color: var(--navy); border-bottom-color: var(--gold);
-      font-weight: bold;
-    }
+    .tab-btn.active { color: var(--gold-light); border-bottom-color: var(--gold); }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* Big quote */
-    .big-quote {
-      background: var(--navy); color: var(--white);
-      padding: 2.5rem; border-radius: 6px;
-      border-left: 6px solid var(--gold);
-      font-size: 1.2rem; line-height: 1.6;
-      margin: 2rem 0; font-style: italic;
+    /* Network */
+    #netSvg {
+      width: 100%; height: 480px;
+      background: rgba(0,0,0,0.3); border-radius: 4px;
+      position: relative; cursor: grab;
     }
-    .big-quote .attribution {
-      font-style: normal; font-family: Calibri, sans-serif;
-      font-size: 0.82rem; color: rgba(255,255,255,0.5);
-      margin-top: 1rem; display: block;
-    }
-
-    /* PSI gauge */
-    .psi-gauge-wrap { display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; }
-    .psi-gauge {
-      position: relative; width: 180px; height: 90px;
-      flex-shrink: 0;
-    }
-
-    /* Scrollspy active nav */
-    .nav-links a.current { color: var(--gold-light); }
-
-    /* ── D3 Network ── */
-    #biasNetworkSvg {
-      width: 100%; height: 500px;
-      background: #f9fafc;
-      border-radius: 4px; overflow: hidden; cursor: grab;
-      position: relative;
-    }
-    #biasNetworkSvg:active { cursor: grabbing; }
-    #biasNetworkSvg svg { width: 100%; height: 100%; }
-    .network-node circle {
-      stroke-width: 2.5; transition: opacity 0.15s;
-    }
-    .network-node text {
-      font-family: Calibri, sans-serif; font-size: 11px;
-      pointer-events: none; fill: #1a1a2e;
-      text-anchor: middle;
-    }
-    .network-link {
-      stroke-linecap: round; transition: opacity 0.15s;
-    }
-    .network-tooltip {
-      position: absolute; z-index: 200;
-      background: var(--navy); color: var(--white);
-      border: 1px solid rgba(212,160,23,0.4);
+    #netSvg:active { cursor: grabbing; }
+    #netSvg svg { width: 100%; height: 100%; }
+    .net-tooltip {
+      position: absolute; z-index: 50;
+      background: var(--ink2); color: var(--cream);
+      border: 1px solid var(--border);
       border-radius: 5px; padding: 10px 14px;
-      font-family: Calibri, sans-serif; font-size: 13px;
-      max-width: 280px; pointer-events: none;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-      line-height: 1.5;
-      opacity: 0; transition: opacity 0.15s;
+      font-size: 12px; max-width: 260px; pointer-events: none;
+      line-height: 1.5; opacity: 0; transition: opacity 0.15s;
     }
-    .network-tooltip .tt-title {
-      font-weight: bold; font-size: 14px;
-      color: var(--gold-light); margin-bottom: 4px;
+    .net-tooltip .nt-title { color: var(--gold-light); font-weight: 600; margin-bottom: 4px; }
+    .net-hint { font-size: 0.75rem; color: var(--steel); font-style: italic; margin-top: 0.6rem; }
+
+    /* Invisible human */
+    .human-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .human-card {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1.2rem; text-align: center;
     }
-    .network-tooltip .tt-r {
-      font-size: 12px; color: rgba(255,255,255,0.6);
+    .human-card .pct {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem; display: block; line-height: 1; margin-bottom: 0.3rem;
     }
-    .network-legend {
-      display: flex; flex-wrap: wrap; gap: 0.6rem;
-      margin-top: 1rem; font-family: Calibri, sans-serif;
-      font-size: 0.8rem; color: var(--text-muted);
+    .pct.low { color: #e87f74; }
+    .pct.high { color: var(--gold-light); }
+    .human-card .topic { font-size: 0.82rem; color: var(--steel); }
+    .human-card .note { font-size: 0.73rem; color: var(--muted); margin-top: 0.4rem; font-style: italic; }
+
+    /* Block quote */
+    .blockquote {
+      border-left: 4px solid var(--gold);
+      padding: 1.5rem 1.8rem;
+      background: rgba(255,255,255,0.02);
+      border-radius: 0 6px 6px 0;
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem; line-height: 1.6;
+      color: var(--cream); margin: 2rem 0; font-style: italic;
     }
-    .network-legend-item {
-      display: flex; align-items: center; gap: 5px;
+    .blockquote .attr {
+      font-family: 'DM Sans', sans-serif;
+      font-style: normal; font-size: 0.78rem;
+      color: var(--steel); margin-top: 0.8rem; display: block;
     }
-    .network-legend-swatch {
-      width: 12px; height: 12px; border-radius: 50%;
-      flex-shrink: 0;
+
+    /* Corr table */
+    .ct { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    .ct th { background: rgba(200,168,75,0.1); color: var(--gold); padding: 0.6rem 1rem; text-align: left; font-weight: 500; }
+    .ct td { padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--cream); }
+    .ct tr:hover td { background: rgba(255,255,255,0.02); }
+    .bar-inline {
+      display: inline-block; height: 6px; border-radius: 2px; vertical-align: middle; margin-left: 0.5rem;
     }
-    .network-hint {
-      font-family: Calibri, sans-serif; font-size: 0.8rem;
-      color: var(--text-muted); margin-top: 0.5rem;
-      font-style: italic;
+
+    /* Bias tags */
+    .btag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.2rem 0; }
+    .btag {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 3px; padding: 0.35rem 0.7rem;
+      font-size: 0.78rem; color: var(--cream);
+    }
+    .btag-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Headline examples */
+    .hl-ex {
+      display: flex; align-items: flex-start; gap: 1rem;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.9rem 1.1rem; margin-bottom: 0.7rem;
+      font-size: 0.88rem;
+    }
+    .hl-badge {
+      font-family: 'Space Mono', monospace; font-size: 0.7rem;
+      padding: 0.25rem 0.5rem; border-radius: 3px; white-space: nowrap; align-self: center;
+      font-weight: 700;
+    }
+    .hl-badge.high { background: #c0392b; color: white; }
+    .hl-badge.low  { background: var(--green); color: white; }
+    .hl-badge.blue { background: #2980b9; color: white; }
+    .hl-badge.purple { background: #7d3c98; color: white; }
+    .hl-text { color: var(--cream); }
+
+    /* Before/After */
+    .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; }
+    .ba-card { border-radius: 6px; padding: 1.4rem; }
+    .ba-card.before { background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.3); }
+    .ba-card.after { background: rgba(30,126,69,0.08); border: 1px solid rgba(30,126,69,0.3); }
+    .ba-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.8rem; }
+    .ba-card.before .ba-label { color: #e87f74; }
+    .ba-card.after .ba-label { color: #5dbb85; }
+    .ba-headline { font-size: 0.88rem; color: var(--cream); line-height: 1.5; margin-bottom: 0.5rem; font-style: italic; }
+    .ba-score { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--steel); }
+
+    /* Implications */
+    #implications { background: var(--ink2); }
+    .impl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap: 1rem; margin-top: 2rem; }
+    .impl-card {
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 1.5rem; background: rgba(255,255,255,0.02);
+    }
+    .impl-card h3 {
+      font-family: 'Space Mono', monospace; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--gold); margin-bottom: 0.8rem;
+    }
+    .impl-card li {
+      font-size: 0.84rem; color: var(--steel);
+      padding: 0.28rem 0 0.28rem 1.1rem; list-style: none; position: relative;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .impl-card li:last-child { border-bottom: none; }
+    .impl-card li::before { content: '→'; position: absolute; left: 0; color: var(--gold); font-size: 0.8rem; }
+
+    /* Recommendations */
+    #recommendations { background: var(--ink); }
+    .rec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 1rem; margin-top: 2rem; }
+    .rec-card {
+      background: rgba(200,168,75,0.04);
+      border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem;
+    }
+    .rec-card h3 { font-family: 'DM Serif Display', serif; color: var(--gold-light); font-size: 1rem; margin-bottom: 1rem; }
+    .rec-card li {
+      font-size: 0.84rem; color: var(--steel);
+      padding: 0.3rem 0 0.3rem 1.2rem; list-style: none; position: relative;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .rec-card li:last-child { border-bottom: none; }
+    .rec-card li::before { content: '✓'; position: absolute; left: 0; color: var(--gold); font-size: 0.78rem; }
+
+    /* Methodology */
+    #methodology { background: var(--ink2); }
+    .method-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 1.5rem; margin-top: 2rem; }
+    .method-card {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 1.6rem;
+    }
+    .method-card h3 { color: var(--gold-light); font-size: 0.95rem; margin-bottom: 0.8rem; font-weight: 600; }
+    .method-card .formula {
+      font-family: 'Space Mono', monospace; font-size: 0.73rem;
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+      padding: 0.7rem 1rem; border-radius: 4px; color: var(--gold-pale);
+      line-height: 1.6; margin: 0.8rem 0;
+    }
+    .method-card p { font-size: 0.84rem; color: var(--steel); line-height: 1.6; }
+
+    /* Limitations */
+    #limitations { background: var(--ink); }
+    .lim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+    .lim-card { border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; }
+    .lim-card h3 { color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.8rem; font-weight: 600; }
+    .lim-card li { font-size: 0.83rem; color: var(--steel); padding: 0.25rem 0 0.25rem 1.1rem; list-style: none; position: relative; }
+    .lim-card li::before { content: '·'; position: absolute; left: 0; color: var(--gold); }
+
+    /* Footer */
+    footer {
+      background: var(--ink2); border-top: 1px solid var(--border);
+      padding: 3rem 2rem; text-align: center;
+      font-size: 0.82rem; color: var(--muted);
+    }
+    footer .f-brand {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem; color: var(--gold); margin-bottom: 0.5rem;
+    }
+    footer a { color: var(--gold); text-decoration: none; }
+
+    @media (max-width: 700px) {
+      .two-col, .team-row, .ba-grid, .lim-grid { grid-template-columns: 1fr; }
+      .framework-grid { grid-template-columns: 1fr 1fr; }
+      .hero-numbers { flex-direction: column; }
+      .hero-num { border-right: none; border-bottom: 1px solid var(--border); }
+      nav .nav-links { display: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- ── NAV ── -->
+<!-- NAV -->
 <nav>
-  <div class="nav-brand">🐾 BiasHounds</div>
+  <div class="nav-brand">🐾 BiasHounds <span>/ RAISE-26</span></div>
   <div class="nav-links">
+    <a href="#hub">Links</a>
     <a href="#about">About</a>
-    <a href="#finding1">Bias</a>
-    <a href="#finding2">Agency</a>
-    <a href="#finding3">Anxiety</a>
-    <a href="#finding4">Human</a>
+    <a href="#finding1">Findings</a>
+    <a href="#methodology">Methods</a>
     <a href="#implications">Impact</a>
     <a href="#recommendations">Action</a>
+    <a href="#hub" class="nav-cta">↗ Resources</a>
   </div>
 </nav>
 
-<!-- ── HERO ── -->
+<!-- HERO -->
 <section id="hero">
-  <div class="hero-tag">RAISE-26 Research Project</div>
-  <h1>AI Cognitive Bias:<br><span>How Media Distorts Our Understanding of AI</span></h1>
-  <p class="hero-subtitle">
-    The narrative shift toward AI autonomy has already happened—we just haven't noticed.
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow">RAISE-26 · Rutgers University · 2026</div>
+  <h1>AI Cognitive Bias:<br><em>How Media Distorts</em><br>Our Understanding of AI</h1>
+  <p class="hero-sub">
+    The narrative shift toward AI autonomy has already happened — we just haven't noticed. 
     We analyzed 10,500 headlines to find out how.
   </p>
-  <div class="hero-stats">
-    <div class="hero-stat">
-      <span class="stat-num">10,500</span>
-      <span class="stat-label">AI News Headlines</span>
-    </div>
-    <div class="hero-stat">
-      <span class="stat-num">3,125</span>
-      <span class="stat-label">News Outlets</span>
-    </div>
-    <div class="hero-stat">
-      <span class="stat-num">3 mo</span>
-      <span class="stat-label">Jun–Sep 2025</span>
-    </div>
-    <div class="hero-stat">
-      <span class="stat-num">8</span>
-      <span class="stat-label">Bias Types Tracked</span>
-    </div>
+  <div class="hero-numbers">
+    <div class="hero-num"><span class="n">10,500</span><div class="l">AI Headlines</div></div>
+    <div class="hero-num"><span class="n">3,125</span><div class="l">News Outlets</div></div>
+    <div class="hero-num"><span class="n">89</span><div class="l">Days Analyzed</div></div>
+    <div class="hero-num"><span class="n">8</span><div class="l">Bias Types</div></div>
+    <div class="hero-num"><span class="n">4</span><div class="l">Novel Metrics</div></div>
   </div>
-  <div class="scroll-hint">
+  <div class="scroll-cue">
+    <div class="scroll-line"></div>
     <span>Scroll to explore</span>
-    <div class="scroll-arrow"></div>
   </div>
 </section>
 
-<!-- ── ABOUT ── -->
+<!-- LINK HUB -->
+<section id="hub">
+  <div class="container">
+    <div class="eyebrow">Project Resources</div>
+    <h2 class="section-title">All Links in One Place</h2>
+    <p class="section-desc">Everything you need to explore our research — code, presentation, profiles, and documentation.</p>
+    <div class="hub-grid">
+      <a href="https://colab.research.google.com/" target="_blank" class="hub-card">
+        <div class="hub-icon">📓</div>
+        <h3>Google Colab Notebook</h3>
+        <p>Full reproducible analysis. Run all cells — 8–12 min on CPU. No API keys required.</p>
+        <div class="hub-tag">Open notebook</div>
+      </a>
+      <a href="https://www.canva.com/design/DAG-P221yOY/DRZk9-B_THaZbO0FqkB7zA/view?utm_content=DAG-P221yOY&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h8b1c6cd2c9" target="_blank" class="hub-card">
+        <div class="hub-icon">📊</div>
+        <h3>Presentation (Canva)</h3>
+        <p>Full slide deck with all findings, visualizations, and AI prompt appendix.</p>
+        <div class="hub-tag">View slides</div>
+      </a>
+      <a href="#" class="hub-card" onclick="alert('This website IS the interactive report!'); return false;">
+        <div class="hub-icon">🌐</div>
+        <h3>Interactive Report</h3>
+        <p>You're here. Full findings with live charts, interactive bias network, and all metrics.</p>
+        <div class="hub-tag">You are here</div>
+      </a>
+      <a href="https://www.linkedin.com/in/sadhana-vasanthakumar/" target="_blank" class="hub-card">
+        <div class="hub-icon">👤</div>
+        <h3>Sadhana Vasanthakumar</h3>
+        <p>CS & Data Science (Statistics). Minor in Cognitive Science & Statistics.</p>
+        <div class="hub-tag">LinkedIn</div>
+      </a>
+      <a href="https://www.linkedin.com/in/krisha-patel-ds/" target="_blank" class="hub-card">
+        <div class="hub-icon">👤</div>
+        <h3>Krisha Patel</h3>
+        <p>Data Science (CS Track). Minor in Business Administration.</p>
+        <div class="hub-tag">LinkedIn</div>
+      </a>
+      <div class="hub-card disabled">
+        <div class="hub-icon">📦</div>
+        <h3>Dataset (Private)</h3>
+        <p>10,500 AI news headlines (Jun–Sep 2025). Available to competition judges only.</p>
+        <div class="hub-tag">restricted</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
 <section id="about">
   <div class="container">
-    <div class="section-label">The Project</div>
-    <h2 class="section-title">Measuring How News Shapes Public Thinking About AI</h2>
-    <p class="section-desc">
-      Others analyze <em>what</em> media says. We analyze <em>how</em> media distorts thinking.
-      Using data science and cognitive psychology, we built four original metrics to quantify psychological manipulation in AI journalism.
-    </p>
+    <div class="eyebrow">The Project</div>
+    <h2 class="section-title">Measuring How News Shapes Thinking About AI</h2>
+    <div class="divider"></div>
+    <p class="section-desc">Others analyze <em>what</em> media says. We analyze <em>how</em> it distorts thinking. Using NLP, cognitive psychology, and four original metrics, we quantify psychological manipulation in AI journalism.</p>
 
-    <div class="team-grid">
+    <div class="team-row">
       <div class="team-card">
-        <h3>Sadhana Vasanthakumar</h3>
-        <p>Computer Science &amp; Data Science (Statistics Track)<br>Minor: Cognitive Science &amp; Statistics</p>
+        <div class="tc-name">Sadhana Vasanthakumar '28</div>
+        <div class="tc-deg">Computer Science & Data Science — Statistics Track</div>
+        <div class="tc-minor">Minor: Cognitive Science & Statistics</div>
       </div>
       <div class="team-card">
-        <h3>Krisha Patel</h3>
-        <p>Data Science (Computer Science Track)<br>Minor: Business Administration</p>
+        <div class="tc-name">Krisha Patel '28</div>
+        <div class="tc-deg">Data Science — Computer Science Track</div>
+        <div class="tc-minor">Minor: Business Administration</div>
       </div>
     </div>
 
-    <div style="margin-top: 3rem;">
-      <div class="section-label">Our Framework</div>
-      <h3 class="section-title" style="font-size:1.5rem;">Four Original Metrics</h3>
-      <div class="approach-grid">
-        <div class="approach-card">
-          <h3>Cognitive Bias Detection</h3>
-          <p>Identified 8 types of psychological biases in headlines — mental shortcuts that distort how readers understand AI.</p>
-        </div>
-        <div class="approach-card">
-          <h3>Power Shift Index (PSI)</h3>
-          <p>Measures who's framed as in control: humans or AI. A score above 100 means AI framing exceeds human framing.</p>
-        </div>
-        <div class="approach-card">
-          <h3>AI Anxiety Index (AAI)</h3>
-          <p>Quantifies how much fear and worry headlines generate, using negative emotion words, risk language, and job threat signals.</p>
-        </div>
-        <div class="approach-card">
-          <h3>The Invisible Human</h3>
-          <p>Tracks deep human experiences — love, grief, spirituality, community — that AI coverage systematically ignores.</p>
-        </div>
+    <div class="eyebrow" style="margin-top:1rem;">Our Framework</div>
+    <h3 style="font-family:'DM Serif Display',serif; font-size:1.5rem; color:var(--cream); margin-bottom:1.5rem;">Four Original Metrics</h3>
+    <div class="framework-grid">
+      <div class="fw-card">
+        <h3>Cognitive Bias Detection</h3>
+        <p>8 types of psychological biases in AI headlines — mental shortcuts that distort how readers understand AI.</p>
+      </div>
+      <div class="fw-card">
+        <h3>Power Shift Index (PSI)</h3>
+        <p>Quantifies who's framed as in control: humans or AI. PSI > 100 = AI framing dominates.</p>
+      </div>
+      <div class="fw-card">
+        <h3>AI Anxiety Index (AAI)</h3>
+        <p>Composite 6-dimension fear measure: negative sentiment, fear keywords, risk words, economic threat, health/safety, ethics signals.</p>
+      </div>
+      <div class="fw-card">
+        <h3>The Invisible Human</h3>
+        <p>Tracks deep human experiences — love, grief, spirituality, community — that AI coverage systematically ignores.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── FINDING 1 ── -->
-<section id="finding1" style="padding: 0; background: var(--cream);">
-  <div class="finding-header">
+<!-- FINDING 1 -->
+<section id="finding1" style="background:var(--ink2); padding:0;">
+  <div style="background:var(--ink); padding:2.5rem 2rem; border-bottom:1px solid var(--border);">
     <div class="container">
-      <div class="finding-num">Finding #1</div>
-      <h2>Over Half of Headlines Use Psychological Manipulation</h2>
-      <p>News doesn't neutrally report on AI — it uses emotional language that activates psychological triggers in readers' minds.</p>
+      <div class="finding-label">Finding #1</div>
+      <h2 class="section-title">Over Half of Headlines Use Psychological Manipulation</h2>
+      <p class="section-desc" style="margin-bottom:0;">News doesn't neutrally report on AI — it activates psychological triggers. 53.9% of headlines stack multiple biases simultaneously.</p>
     </div>
   </div>
-  <div style="padding: 3rem 2rem;">
+  <div style="padding:3rem 2rem;">
     <div class="container">
-      <div class="stat-row">
-        <div class="big-stat">
-          <span class="num">53.9<span class="unit">%</span></span>
-          <div class="label">Headlines with multiple biases</div>
-        </div>
-        <div class="big-stat">
-          <span class="num">5,663</span>
-          <div class="label">Out of 10,500 headlines</div>
-        </div>
-        <div class="big-stat">
-          <span class="num">0.546</span>
-          <div class="label">Avg bias intensity score (out of 1.0)</div>
-        </div>
+      <div class="stat-strip">
+        <div class="stat-cell"><span class="sv">53.9%</span><div class="sl">Headlines with multiple biases</div></div>
+        <div class="stat-cell"><span class="sv">5,663</span><div class="sl">Out of 10,500 headlines</div></div>
+        <div class="stat-cell"><span class="sv">0.546</span><div class="sl">Avg bias intensity (0–1)</div></div>
+        <div class="stat-cell"><span class="sv">20.2%</span><div class="sl">Show extreme bias</div></div>
       </div>
 
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('bias-dist','bias')">Bias Distribution</button>
-        <button class="tab-btn" onclick="switchTab('bias-network','bias')">Bias Co-occurrence</button>
-        <button class="tab-btn" onclick="switchTab('bias-examples','bias')">Real Examples</button>
+        <button class="tab-btn active" onclick="switchTab('b-dist','b')">Distribution</button>
+        <button class="tab-btn" onclick="switchTab('b-net','b')">Co-occurrence Network</button>
+        <button class="tab-btn" onclick="switchTab('b-ex','b')">Real Examples</button>
       </div>
 
-      <div id="bias-dist" class="tab-panel active">
-        <div class="chart-row">
-          <div class="chart-wrap">
-            <div class="chart-title">Cognitive Bias Types in Headlines</div>
-            <div class="chart-subtitle">Prevalence of each bias type across 10,500 headlines</div>
-            <canvas id="biasBarChart"></canvas>
+      <div id="b-dist" class="tab-panel active">
+        <div class="two-col">
+          <div class="chart-card">
+            <div class="cc-title">Cognitive Bias Types in Headlines</div>
+            <div class="cc-sub">Prevalence per bias type (n = 10,500)</div>
+            <canvas id="biasBar"></canvas>
           </div>
-          <div class="chart-wrap">
-            <div class="chart-title">Bias Prevalence Breakdown</div>
-            <div class="chart-subtitle">Share of headlines with 0, 1, or multiple biases</div>
-            <canvas id="biasDoughnutChart"></canvas>
+          <div class="chart-card">
+            <div class="cc-title">Bias Load Distribution</div>
+            <div class="cc-sub">Headlines with 0, 1, or multiple biases</div>
+            <canvas id="biasDoughnut"></canvas>
           </div>
         </div>
-        <div class="insight">
-          <strong>Most common bias:</strong> Anthropomorphism — treating AI as if it has human desires, feelings, or intentions (e.g. "AI <em>wants</em> to replace workers").
-        </div>
+        <div class="callout"><strong>Most prevalent:</strong> Anthropomorphism — treating AI as if it has human desires, feelings, or intentions (e.g. "AI <em>wants</em> to replace workers"). Found in 48.4% of high-bias headlines.</div>
       </div>
 
-      <div id="bias-network" class="tab-panel">
-        <div class="chart-wrap" style="padding-bottom:1rem;">
-          <div class="chart-title">Bias Co-occurrence Network Map</div>
-          <div class="chart-subtitle">Node size = prevalence in headlines · Line thickness = correlation strength · Hover nodes &amp; connections for details · Drag to explore</div>
+      <div id="b-net" class="tab-panel">
+        <div class="chart-card">
+          <div class="cc-title">Bias Co-occurrence Network</div>
+          <div class="cc-sub">Node size = prevalence · Line thickness = correlation strength · Hover for insight · Drag nodes</div>
           <div style="position:relative;">
-            <div id="biasNetworkSvg"></div>
-            <div id="networkTooltip" class="network-tooltip"></div>
+            <div id="netSvg"></div>
+            <div id="netTooltip" class="net-tooltip"></div>
           </div>
-          <div class="network-hint">💡 Drag any node to reposition it · Hover over a node or line for details</div>
-          <div class="network-legend" id="networkLegend"></div>
+          <p class="net-hint">💡 Hover over nodes and connections for details · Drag to rearrange</p>
         </div>
-        <div class="insight insight-red">
-          <strong>Strongest link:</strong> Techno-Utopianism ↔ Control Loss (r = 0.85) — "AI will save us" headlines routinely pair with "We can't control AI" messaging, creating a deeply conflicting emotional cocktail.
-        </div>
-        <div class="insight">
-          These aren't random word choices. News outlets are deliberately combining emotional triggers to maximize engagement. Readers experience <strong>hope + fear + anxiety simultaneously</strong> — creating confusion about AI, not clarity.
-        </div>
+        <div class="callout red"><strong>Strongest link:</strong> Techno-Utopianism ↔ Control Loss (r = 0.85) — "AI will save us" routinely pairs with "We can't control AI," creating hope and helplessness simultaneously.</div>
+        <div class="callout">These aren't random word choices. Multiple emotional triggers are deliberately combined to maximize engagement — readers experience <strong>hope + fear + anxiety at once</strong>. This creates confusion, not clarity.</div>
       </div>
 
-      <div id="bias-examples" class="tab-panel">
-        <p style="font-family: Calibri, sans-serif; color: var(--text-muted); margin-bottom: 1.2rem;">Three major bias types and how they appear in real headlines:</p>
-        <div class="bias-list">
-          <div class="bias-tag"><div class="dot"></div>Fear Bias</div>
-          <div class="bias-tag"><div class="dot"></div>Optimism Bias</div>
-          <div class="bias-tag"><div class="dot"></div>Anthropomorphism</div>
-          <div class="bias-tag"><div class="dot"></div>Techno-Utopianism</div>
-          <div class="bias-tag"><div class="dot"></div>Economic Threat</div>
-          <div class="bias-tag"><div class="dot"></div>Control Loss</div>
-          <div class="bias-tag"><div class="dot"></div>Moral Panic</div>
-          <div class="bias-tag"><div class="dot"></div>Agency Attribution</div>
+      <div id="b-ex" class="tab-panel">
+        <div class="btag-row">
+          <div class="btag"><div class="btag-dot" style="background:#c0392b;"></div>Fear Bias</div>
+          <div class="btag"><div class="btag-dot" style="background:#27ae60;"></div>Optimism Bias</div>
+          <div class="btag"><div class="btag-dot" style="background:#8e44ad;"></div>Anthropomorphism</div>
+          <div class="btag"><div class="btag-dot" style="background:#2980b9;"></div>Techno-Utopianism</div>
+          <div class="btag"><div class="btag-dot" style="background:#e67e22;"></div>Economic Threat</div>
+          <div class="btag"><div class="btag-dot" style="background:#1b3168;"></div>Control Loss</div>
+          <div class="btag"><div class="btag-dot" style="background:#0d7377;"></div>Moral Panic</div>
+          <div class="btag"><div class="btag-dot" style="background:#7f8c8d;"></div>Agency Attribution</div>
         </div>
-        <div class="examples">
-          <div class="example-card">
-            <div class="example-score">FEAR</div>
-            <div class="example-text">"AI apocalypse threatens humanity" → triggers anxiety and catastrophic thinking</div>
+        <div class="hl-ex"><div class="hl-badge high">FEAR</div><div class="hl-text">"AI apocalypse threatens humanity" — triggers catastrophic thinking, activates fight-or-flight</div></div>
+        <div class="hl-ex"><div class="hl-badge blue">OPTIMISM</div><div class="hl-text">"AI will solve all our problems" — uncritical enthusiasm, suppresses healthy skepticism</div></div>
+        <div class="hl-ex"><div class="hl-badge purple">ANTHRO</div><div class="hl-text">"AI <em>wants</em> to replace workers" — frames AI as having human desires and intentions</div></div>
+        <div class="hl-ex"><div class="hl-badge" style="background:#c0392b;color:white;">CONTROL</div><div class="hl-text">"AI is spiraling beyond human control" — frames AI as unstoppable autonomous force</div></div>
+        <div class="ba-grid" style="margin-top:1.5rem;">
+          <div class="ba-card before">
+            <div class="ba-label">High Bias (AAI: 100)</div>
+            <div class="ba-headline">"AI raises job security fears as 71% of Americans see risk of permanent losses"</div>
+            <div class="ba-score">Fear Bias: 1.0 · Economic Threat · Control Loss · Moral Panic</div>
           </div>
-          <div class="example-card">
-            <div class="example-score" style="background: #2980b9;">OPTIMISM</div>
-            <div class="example-text">"AI will solve all our problems" → triggers uncritical enthusiasm, ignores risks</div>
-          </div>
-          <div class="example-card">
-            <div class="example-score" style="background: #8e44ad;">ANTHRO</div>
-            <div class="example-text">"AI <em>wants</em> to replace workers" → treats AI as if it has human desires and intentions</div>
-          </div>
-          <div class="example-card">
-            <div class="example-score" style="background: #16a085;">CONTROL LOSS</div>
-            <div class="example-text">"AI is spiraling beyond human control" → frames AI as an unstoppable autonomous force</div>
+          <div class="ba-card after">
+            <div class="ba-label">Neutral Reframe</div>
+            <div class="ba-headline">"Study examines AI's potential effects on labor market participation"</div>
+            <div class="ba-score">Bias Score: 0.08 · Factual framing · No emotional triggers</div>
           </div>
         </div>
       </div>
@@ -650,261 +699,225 @@
   </div>
 </section>
 
-<!-- ── FINDING 2 ── -->
-<section id="finding2" style="padding: 0; background: var(--white);">
-  <div class="finding-header">
+<!-- FINDING 2 -->
+<section id="finding2" style="background:var(--ink); padding:0;">
+  <div style="background:var(--ink2); padding:2.5rem 2rem; border-bottom:1px solid var(--border);">
     <div class="container">
-      <div class="finding-num">Finding #2</div>
-      <h2>AI Agency Already Dominates Media Narratives</h2>
-      <p>The narrative shift toward AI autonomy isn't a future trend — it's already embedded in current coverage.</p>
+      <div class="finding-label">Finding #2</div>
+      <h2 class="section-title">AI Agency Already Dominates Media Narratives</h2>
+      <p class="section-desc" style="margin-bottom:0;">The narrative shift isn't a future trend. It's already embedded in current coverage — for every headline showing human control, there are 2.3 showing AI agency.</p>
     </div>
   </div>
-  <div style="padding: 3rem 2rem;">
+  <div style="padding:3rem 2rem;">
     <div class="container">
-      <div class="stat-row">
-        <div class="big-stat">
-          <span class="num">145.5</span>
-          <div class="label">Power Shift Index (PSI)</div>
+      <div class="stat-strip">
+        <div class="stat-cell"><span class="sv">145.5</span><div class="sl">Power Shift Index</div></div>
+        <div class="stat-cell"><span class="sv">12.7%</span><div class="sl">AI acts independently</div></div>
+        <div class="stat-cell"><span class="sv">5.5%</span><div class="sl">Humans control AI</div></div>
+        <div class="stat-cell"><span class="sv">2.3:1</span><div class="sl">AI vs human agency ratio</div></div>
+      </div>
+      <div class="two-col">
+        <div class="chart-card">
+          <div class="cc-title">Agency Distribution</div>
+          <div class="cc-sub">Who is portrayed as in control?</div>
+          <canvas id="agencyPie"></canvas>
         </div>
-        <div class="big-stat">
-          <span class="num">12.7<span class="unit">%</span></span>
-          <div class="label">Headlines: AI acts independently</div>
-        </div>
-        <div class="big-stat">
-          <span class="num">5.5<span class="unit">%</span></span>
-          <div class="label">Headlines: Humans control AI</div>
-        </div>
-        <div class="big-stat">
-          <span class="num">2.3<span class="unit">:1</span></span>
-          <div class="label">AI agency vs. human control ratio</div>
+        <div class="chart-card">
+          <div class="cc-title">Power Shift Index Over Time</div>
+          <div class="cc-sub">PSI = 100 is balance point · Our score: 145.5</div>
+          <canvas id="psiChart"></canvas>
         </div>
       </div>
-
-      <div class="chart-row">
-        <div class="chart-wrap">
-          <div class="chart-title">Agency Distribution in Headlines</div>
-          <div class="chart-subtitle">Who is portrayed as in control?</div>
-          <canvas id="agencyPieChart"></canvas>
-        </div>
-        <div class="chart-wrap">
-          <div class="chart-title">Power Shift Index Explained</div>
-          <div class="chart-subtitle">PSI = 100 means equal framing; above 100 = AI dominates</div>
-          <canvas id="psiGaugeChart"></canvas>
-        </div>
+      <div class="callout red">
+        <strong>A red flag:</strong> For every headline showing <em>human</em> control of AI, there are 2.3 showing <em>AI</em> agency. This primes the public to accept AI having independent decision-making power — and stops people from asking: <strong>WHO programmed it? WHO profits? WHO is accountable when it fails?</strong>
       </div>
-
-      <div class="insight insight-red">
-        <strong>A red flag for society:</strong> For every 1 headline showing <em>human</em> control, there are 2.3 headlines showing <em>AI</em> agency. This primes the public to accept AI having independent decision-making power — and stops us from asking: <strong>WHO programmed it? WHO profits? WHO is accountable when it fails?</strong>
-      </div>
-
-      <div class="big-quote">
-        "When we talk about AI as if it makes choices, we stop asking who is responsible."
-        <span class="attribution">— BiasHounds analysis, 2025</span>
+      <div class="blockquote">
+        "We don't say electricity decides to power homes. But we DO say AI threatens jobs."
+        <span class="attr">— BiasHounds analysis, 2025 · The language of agency shapes the politics of accountability.</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── FINDING 3 ── -->
-<section id="finding3" style="padding: 0; background: var(--cream);">
-  <div class="finding-header">
+<!-- FINDING 3 -->
+<section id="finding3" style="background:var(--ink2); padding:0;">
+  <div style="background:var(--ink); padding:2.5rem 2rem; border-bottom:1px solid var(--border);">
     <div class="container">
-      <div class="finding-num">Finding #3</div>
-      <h2>Anxiety Is Real, Moderate, and Precisely Targeted</h2>
-      <p>AI coverage doesn't create mass panic — but it reliably channels fear toward specific, concentrated themes.</p>
+      <div class="finding-label">Finding #3</div>
+      <h2 class="section-title">Anxiety Is Real, Moderate, and Precisely Targeted</h2>
+      <p class="section-desc" style="margin-bottom:0;">AI coverage doesn't create mass panic — but it reliably channels fear toward specific, concentrated themes. The formula is: <strong>Jobs + Fear language + Loss of Control = Maximum Anxiety.</strong></p>
     </div>
   </div>
-  <div style="padding: 3rem 2rem;">
+  <div style="padding:3rem 2rem;">
     <div class="container">
-      <div class="stat-row">
-        <div class="big-stat">
-          <span class="num">12.8</span>
-          <div class="label">AI Anxiety Index (out of 100)</div>
-        </div>
-        <div class="big-stat">
-          <span class="num">13.2</span>
-          <div class="label">Peak AAI (August 2025)</div>
-        </div>
-        <div class="big-stat">
-          <span class="num">±13.9</span>
-          <div class="label">Standard deviation (wide spread)</div>
-        </div>
-        <div class="big-stat">
-          <span class="num">0.46</span>
-          <div class="label">Fear bias correlation with AAI</div>
-        </div>
+      <div class="stat-strip">
+        <div class="stat-cell"><span class="sv">12.8</span><div class="sl">AI Anxiety Index (of 100)</div></div>
+        <div class="stat-cell"><span class="sv">13.2</span><div class="sl">Peak AAI (Aug 2025)</div></div>
+        <div class="stat-cell"><span class="sv">±13.9</span><div class="sl">Std deviation (wide spread)</div></div>
+        <div class="stat-cell"><span class="sv">0.46</span><div class="sl">Fear bias ↔ AAI correlation</div></div>
       </div>
 
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('aai-corr','anxiety')">Correlations</button>
-        <button class="tab-btn" onclick="switchTab('aai-examples','anxiety')">High vs Low Anxiety</button>
+        <button class="tab-btn active" onclick="switchTab('a-corr','a')">Correlations</button>
+        <button class="tab-btn" onclick="switchTab('a-ex','a')">High vs Low Anxiety</button>
       </div>
 
-      <div id="aai-corr" class="tab-panel active">
-        <div class="chart-wrap">
-          <div class="chart-title">What Predicts Higher AI Anxiety?</div>
-          <div class="chart-subtitle">Pearson correlation coefficients between bias types and AI Anxiety Index (AAI)</div>
-          <canvas id="aaCorrelationChart"></canvas>
+      <div id="a-corr" class="tab-panel active">
+        <div class="chart-card">
+          <div class="cc-title">What Predicts Higher AI Anxiety?</div>
+          <div class="cc-sub">Pearson correlation coefficients (all significant at p &lt; 0.001)</div>
+          <canvas id="aaCorr"></canvas>
         </div>
-        <table class="corr-table" style="margin-top:1rem;">
-          <thead><tr><th>Predictor</th><th>Correlation with AAI</th><th>Strength</th></tr></thead>
+        <table class="ct">
+          <thead><tr><th>Predictor</th><th>r with AAI</th><th>Visual</th></tr></thead>
           <tbody>
-            <tr><td>Fear Bias</td><td>0.456</td><td><div class="corr-bar" style="width:91px;background:var(--red);"></div></td></tr>
-            <tr><td>Economic Threat</td><td>0.285</td><td><div class="corr-bar" style="width:57px;background:var(--red);opacity:0.7;"></div></td></tr>
-            <tr><td>Moral Panic</td><td>0.249</td><td><div class="corr-bar" style="width:50px;background:#e67e22;"></div></td></tr>
-            <tr><td>Bias Intensity</td><td>0.229</td><td><div class="corr-bar" style="width:46px;background:#e67e22;opacity:0.8;"></div></td></tr>
-            <tr><td>Control Loss</td><td>0.173</td><td><div class="corr-bar" style="width:35px;background:#f39c12;"></div></td></tr>
-            <tr><td>Techno-Utopianism</td><td>0.131</td><td><div class="corr-bar" style="width:26px;background:#bdc3c7;"></div></td></tr>
-            <tr><td>Agency Attribution</td><td>0.111</td><td><div class="corr-bar" style="width:22px;background:#bdc3c7;"></div></td></tr>
-            <tr><td>Optimism Bias</td><td>0.097</td><td><div class="corr-bar" style="width:19px;background:#bdc3c7;"></div></td></tr>
-            <tr><td>Anthropomorphism</td><td>0.074</td><td><div class="corr-bar" style="width:15px;background:#bdc3c7;"></div></td></tr>
+            <tr><td>Fear Bias</td><td>0.456</td><td><div class="bar-inline" style="width:91px;background:#c0392b;height:6px;border-radius:3px;"></div></td></tr>
+            <tr><td>Economic Threat</td><td>0.285</td><td><div class="bar-inline" style="width:57px;background:#e67e22;height:6px;border-radius:3px;"></div></td></tr>
+            <tr><td>Moral Panic</td><td>0.249</td><td><div class="bar-inline" style="width:50px;background:#e67e22;height:6px;border-radius:3px;"></div></td></tr>
+            <tr><td>Bias Intensity</td><td>0.229</td><td><div class="bar-inline" style="width:46px;background:#f39c12;height:6px;border-radius:3px;"></div></td></tr>
+            <tr><td>Control Loss</td><td>0.173</td><td><div class="bar-inline" style="width:35px;background:#f39c12;height:6px;border-radius:3px;"></div></td></tr>
+            <tr><td>Techno-Utopianism</td><td>0.131</td><td><div class="bar-inline" style="width:26px;background:#8892a4;height:6px;border-radius:3px;"></div></td></tr>
+            <tr><td>Optimism Bias</td><td>0.097</td><td><div class="bar-inline" style="width:19px;background:#8892a4;height:6px;border-radius:3px;"></div></td></tr>
+            <tr><td>Anthropomorphism</td><td>0.074</td><td><div class="bar-inline" style="width:15px;background:#8892a4;height:6px;border-radius:3px;"></div></td></tr>
           </tbody>
         </table>
-      </div>
-
-      <div id="aai-examples" class="tab-panel">
-        <p style="font-family:Calibri,sans-serif;color:var(--text-muted);margin-bottom:1rem;"><strong>The Formula:</strong> Jobs + Fear Language + Loss of Control = Maximum Anxiety</p>
-        <h4 style="font-family:Calibri,sans-serif;font-size:0.9rem;color:var(--red);margin-bottom:0.8rem;text-transform:uppercase;letter-spacing:0.06em;">High-Anxiety Headlines</h4>
-        <div class="examples">
-          <div class="example-card">
-            <div class="example-score">AAI: 45.2</div>
-            <div class="example-text">"AI threatens 40% of jobs as automation accelerates"</div>
-          </div>
-          <div class="example-card">
-            <div class="example-score">AAI: 38.7</div>
-            <div class="example-text">"Workers fear AI replacement as layoffs surge"</div>
-          </div>
-          <div class="example-card">
-            <div class="example-score">AAI: 36.1</div>
-            <div class="example-text">"Experts warn: AI development spiraling out of control"</div>
-          </div>
-        </div>
-        <h4 style="font-family:Calibri,sans-serif;font-size:0.9rem;color:var(--green);margin:1.5rem 0 0.8rem;text-transform:uppercase;letter-spacing:0.06em;">Low-Anxiety Headlines</h4>
-        <div class="examples">
-          <div class="example-card">
-            <div class="example-score low">AAI: 2.1</div>
-            <div class="example-text">"Hospital implements AI scheduling system"</div>
-          </div>
-          <div class="example-card">
-            <div class="example-score low">AAI: 1.8</div>
-            <div class="example-text">"University offers new AI certificate program"</div>
-          </div>
-        </div>
-        <div class="insight">
-          Weekend vs. weekday: <strong>No significant difference</strong> — anxiety is consistent across all days of the week. It's in the language, not the timing.
+        <div class="callout" style="margin-top:1.5rem;">
+          <strong>Surprising finding:</strong> Power Shift Index ↔ Anxiety (r = 0.12). Portraying AI as powerful does <em>not</em> create anxiety. Anxiety comes from <strong>emotional language</strong>, not discussions of capability. We can talk about powerful AI without fear — if we use balanced framing.
         </div>
       </div>
 
-      <div class="chart-wrap" style="margin-top:1.5rem;">
-        <div class="chart-title">Key Correlations: The Big Picture</div>
-        <div class="chart-subtitle">How our four metrics relate to each other</div>
-        <canvas id="corrMatrix"></canvas>
-      </div>
-
-      <div class="insight">
-        <strong>Surprising finding:</strong> Power Shift Index ↔ Anxiety (r = 0.12). Portraying AI as powerful does <em>not</em> create anxiety. Anxiety comes from <strong>emotional language</strong>, not discussions of AI's capabilities. We can talk about powerful AI without fear — if we use balanced framing.
+      <div id="a-ex" class="tab-panel">
+        <p style="color:var(--steel);font-size:0.88rem;margin-bottom:1rem;"><strong style="color:var(--gold-light);">The Formula:</strong> Jobs + Fear Language + Loss of Control = Maximum Anxiety</p>
+        <p style="color:var(--steel);font-size:0.82rem;margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.08em;">High-Anxiety Headlines</p>
+        <div class="hl-ex"><div class="hl-badge high">AAI: 45.2</div><div class="hl-text">"AI threatens 40% of jobs as automation accelerates"</div></div>
+        <div class="hl-ex"><div class="hl-badge high">AAI: 38.7</div><div class="hl-text">"Workers fear AI replacement as layoffs surge"</div></div>
+        <div class="hl-ex"><div class="hl-badge high">AAI: 36.1</div><div class="hl-text">"Experts warn: AI development spiraling out of control"</div></div>
+        <p style="color:var(--steel);font-size:0.82rem;margin:1.5rem 0 1rem;text-transform:uppercase;letter-spacing:0.08em;">Low-Anxiety Headlines</p>
+        <div class="hl-ex"><div class="hl-badge low">AAI: 2.1</div><div class="hl-text">"Hospital implements AI scheduling system"</div></div>
+        <div class="hl-ex"><div class="hl-badge low">AAI: 1.8</div><div class="hl-text">"University offers new AI certificate program"</div></div>
+        <div class="callout" style="margin-top:1rem;"><strong>Weekend vs. weekday:</strong> No significant difference — anxiety is in the language, not the timing. It's structural, not cyclical.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── FINDING 4 ── -->
-<section id="finding4" style="padding: 0; background: var(--white);">
-  <div class="finding-header">
+<!-- FINDING 4 -->
+<section id="finding4" style="background:var(--ink); padding:0;">
+  <div style="background:var(--ink2); padding:2.5rem 2rem; border-bottom:1px solid var(--border);">
     <div class="container">
-      <div class="finding-num">Finding #4</div>
-      <h2>The Invisible Human — What News Never Asks</h2>
-      <p>Media reduces AI to Work + Money + Efficiency, ignoring how AI affects everything that makes us most human.</p>
+      <div class="finding-label">Finding #4</div>
+      <h2 class="section-title">The Invisible Human — What News Never Asks</h2>
+      <p class="section-desc" style="margin-bottom:0;">Media reduces AI to Work + Money + Efficiency, systematically ignoring how AI affects love, loss, faith, community, and what it means to be human.</p>
     </div>
   </div>
-  <div style="padding: 3rem 2rem;">
+  <div style="padding:3rem 2rem;">
     <div class="container">
       <div class="human-grid">
-        <div class="human-card">
-          <span class="pct low">0.57%</span>
-          <div class="topic">Spirituality &amp; Meaning</div>
-          <div class="missing">"What gives life meaning when AI does our work?"</div>
-        </div>
-        <div class="human-card">
-          <span class="pct low">0.80%</span>
-          <div class="topic">Embodied Experience</div>
-          <div class="missing">"What AI can't touch, smell, or feel"</div>
-        </div>
-        <div class="human-card">
-          <span class="pct low">1.14%</span>
-          <div class="topic">Grief &amp; Caregiving</div>
-          <div class="missing">"Technology in end-of-life care"</div>
-        </div>
-        <div class="human-card">
-          <span class="pct low">1.71%</span>
-          <div class="topic">Intimacy &amp; Relationships</div>
-          <div class="missing">"How AI affects romantic connections"</div>
-        </div>
-        <div class="human-card">
-          <span class="pct high">24.30%</span>
-          <div class="topic">Artistic Process</div>
-          <div class="missing">Most covered — AI art generates controversy &amp; clicks</div>
-        </div>
+        <div class="human-card"><span class="pct low">0.57%</span><div class="topic">Spirituality & Meaning</div><div class="note">"What gives life meaning when AI does our work?"</div></div>
+        <div class="human-card"><span class="pct low">0.80%</span><div class="topic">Embodied Experience</div><div class="note">"What AI can't touch, smell, or feel"</div></div>
+        <div class="human-card"><span class="pct low">1.14%</span><div class="topic">Grief & Caregiving</div><div class="note">"Technology in end-of-life care"</div></div>
+        <div class="human-card"><span class="pct low">1.71%</span><div class="topic">Intimacy & Relationships</div><div class="note">"How AI affects romantic connections"</div></div>
+        <div class="human-card"><span class="pct high">24.30%</span><div class="topic">Artistic Process</div><div class="note">Most covered — AI art generates controversy & clicks</div></div>
       </div>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Coverage of Human Experience Domains</div>
-        <div class="chart-subtitle">% of headlines touching each dimension of human life</div>
-        <canvas id="invisibleHumanChart"></canvas>
+      <div class="chart-card">
+        <div class="cc-title">Coverage of Human Experience Domains</div>
+        <div class="cc-sub">% of headlines touching each dimension of human life (NOTE: the low percentages ARE the finding)</div>
+        <canvas id="invisibleHuman"></canvas>
       </div>
-
-      <div class="insight insight-red">
-        <strong>The consequence:</strong> We're having an extremely <em>narrow</em> conversation about AI's impact — ignoring how it affects love, loss, faith, community, and what it means to be human. The low percentages aren't errors — they <em>are</em> the finding.
+      <div class="callout red">
+        <strong>The erasure:</strong> Out of 10,500 headlines — 10,494 said nothing about ethical dilemmas (99.94%). 10,440 said nothing about spirituality (99.43%). 10,416 said nothing about grief (99.20%). These aren't gaps. They're erasures.
       </div>
-
-      <div class="big-quote">
+      <div class="blockquote">
         "If AI truly transforms humanity, why aren't we asking how it changes grief, love, meaning, or faith?"
-        <span class="attribution">— BiasHounds research question</span>
+        <span class="attr">— BiasHounds research question, 2025</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── IMPLICATIONS ── -->
+<!-- METHODOLOGY -->
+<section id="methodology">
+  <div class="container">
+    <div class="eyebrow">Technical Documentation</div>
+    <h2 class="section-title">Methodology & Formulas</h2>
+    <div class="divider"></div>
+    <p class="section-desc">All models are open-weights. No proprietary AI. Fully reproducible with seed=42.</p>
+    <div class="method-grid">
+      <div class="method-card">
+        <h3>Cognitive Bias Detection</h3>
+        <div class="formula">BiasScore = SemanticSimilarity(headline, prototype)<br>+ (0.20 × KeywordCount)<br><br>Normalized to [0,1] via MinMaxScaler</div>
+        <p>Uses <code>sentence-transformers/all-MiniLM-L6-v2</code> for semantic similarity to 8 prototype bias descriptions. Custom 84-keyword lexicons per bias category. VADER sentiment analysis as supporting signal.</p>
+      </div>
+      <div class="method-card">
+        <h3>Power Shift Index (PSI)</h3>
+        <div class="formula">PSI = [(AI_actor + AI_threat) /  <br>(Human_actor + AI_tool)] × 100<br><br>PSI = 145.48 (our result)</div>
+        <p>Adapted from computational media studies agency-framing research. PSI = 100 is balance; above 100 means AI agency framing dominates. Keyword sets validated via semantic embeddings.</p>
+      </div>
+      <div class="method-card">
+        <h3>AI Anxiety Index (AAI)</h3>
+        <div class="formula">AAI = [(2.5×NS + 3.5×FI + 2.5×RI<br>+ 2.0×ET + 1.5×HS + 1.0×ES)<br>/ max] × 100</div>
+        <p>NS=Negative sentiment, FI=Fear intensity (highest weight: 3.5), RI=Risk intensity, ET=Economic threat, HS=Health/safety, ES=Ethics signals. Composite 6-dimension weighted score.</p>
+      </div>
+      <div class="method-card">
+        <h3>Invisible Human Framework</h3>
+        <div class="formula">Coverage% = (Headlines_mentioning_domain<br>/ Total_headlines) × 100<br><br>8 human life domains tracked</div>
+        <p>Keyword-based domain detection across 8 human experience categories: artistic process, ethics, work/employment, community, intimacy, grief, embodiment, spirituality. Validated with semantic similarity scoring.</p>
+      </div>
+      <div class="method-card">
+        <h3>Statistical Validation</h3>
+        <div class="formula">All major correlations: p &lt; 0.001<br>n = 10,500<br>Pearson r with significance tests</div>
+        <p>sciPy Pearson r, p-values. At n = 10,500, findings are not due to chance. Bias intensity ↔ AAI: r=0.64. Economic threat ↔ work topics: r=0.78. Techno-utopianism ↔ control loss: r=0.85 (strongest).</p>
+      </div>
+      <div class="method-card">
+        <h3>Technical Stack</h3>
+        <div class="formula">Python 3.10+ · Google Colab<br>sentence-transformers · VADER<br>scikit-learn · NetworkX · Plotly</div>
+        <p>Also: numpy, pandas, matplotlib, scipy, MinMaxScaler. All models open-weights. Random seeds set (seed=42). Single-click execution via "Runtime → Run All." Runtime: 8–12 min on CPU.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPLICATIONS -->
 <section id="implications">
   <div class="container">
-    <div class="section-label">Real-World Impact</div>
+    <div class="eyebrow">Real-World Impact</div>
     <h2 class="section-title">Who This Affects</h2>
+    <div class="divider"></div>
     <p class="section-desc">Biased AI coverage doesn't just shape individual opinions — it reverberates across society, policy, and industry.</p>
     <div class="impl-grid">
       <div class="impl-card">
         <h3>The Public</h3>
         <ul>
-          <li>News shapes your AI opinions unconsciously</li>
-          <li>Emotional headlines trigger psychological responses</li>
-          <li>You're forming views based on narrow framing</li>
+          <li>News shapes AI opinions unconsciously</li>
+          <li>Emotional headlines trigger real psychological responses</li>
+          <li>Views form on narrow, distorted framing</li>
           <li>Critical media literacy is now essential</li>
         </ul>
       </div>
       <div class="impl-card">
-        <h3>Business &amp; Tech Leaders</h3>
+        <h3>Business & Tech Leaders</h3>
         <ul>
           <li>Public fear affects AI adoption rates</li>
           <li>Biased coverage influences policy and regulation</li>
-          <li>Employee anxiety requires thoughtful communication</li>
+          <li>Employee anxiety needs thoughtful communication</li>
           <li>Responsible AI needs better public engagement</li>
         </ul>
       </div>
       <div class="impl-card">
-        <h3>Journalists &amp; Media</h3>
+        <h3>Journalists & Media</h3>
         <ul>
           <li>Current framing creates confusion, not clarity</li>
-          <li>Narrow job/risk focus misses bigger questions</li>
+          <li>Jobs/risk focus misses bigger human questions</li>
           <li>Balanced coverage requires bias awareness</li>
           <li>Ask: "What are we NOT covering?"</li>
         </ul>
       </div>
       <div class="impl-card">
-        <h3>Policymakers &amp; Educators</h3>
+        <h3>Policymakers & Educators</h3>
         <ul>
-          <li>Media anxiety affects public support for AI policy</li>
+          <li>Media anxiety affects public policy support</li>
           <li>Students need skills to recognize biased framing</li>
-          <li>AI education must address ethics and relationships</li>
+          <li>AI education must address ethics and meaning</li>
           <li>Fund media literacy programs</li>
         </ul>
       </div>
@@ -912,19 +925,20 @@
   </div>
 </section>
 
-<!-- ── RECOMMENDATIONS ── -->
+<!-- RECOMMENDATIONS -->
 <section id="recommendations">
   <div class="container">
-    <div class="section-label" style="color: rgba(212,160,23,0.7);">Evidence-Based Recommendations</div>
+    <div class="eyebrow">Evidence-Based Action</div>
     <h2 class="section-title">What Should Change</h2>
-    <p class="section-desc">Grounded in the data, our recommendations target the specific mechanisms creating distorted AI coverage.</p>
+    <div class="divider"></div>
+    <p class="section-desc">Grounded in data. Targeting the specific mechanisms that create distorted AI coverage.</p>
     <div class="rec-grid">
       <div class="rec-card">
         <h3>For Media Organizations</h3>
         <ul>
           <li>Create editorial guidelines on cognitive bias awareness</li>
           <li>Train reporters to recognize fear/optimism triggers</li>
-          <li>Expand coverage beyond work &amp; efficiency narratives</li>
+          <li>Expand coverage beyond work & efficiency narratives</li>
           <li>Cover ethics, relationships, meaning-making, community</li>
           <li>Develop "bias auditing" tools for headline review</li>
         </ul>
@@ -934,457 +948,323 @@
         <ul>
           <li>Teach students to identify cognitive biases in headlines</li>
           <li>Include media literacy in all AI education programs</li>
-          <li>Use tools like our Credibility Score (0–100) for curriculum</li>
+          <li>Use "Invisible Human" framework in ethics courses</li>
+          <li>Encourage critical comparison across news sources</li>
         </ul>
       </div>
       <div class="rec-card">
-        <h3>For Readers</h3>
+        <h3>For Policymakers</h3>
         <ul>
-          <li>Don't rely on a single news source for AI information</li>
-          <li>Seek outlets with credibility scores above 50</li>
-          <li>Compare how different sources frame the same AI story</li>
-          <li>Notice when fear or optimism language appears</li>
+          <li>Monitor Power Shift Index trends over time</li>
+          <li>Fund independent, balanced AI journalism</li>
+          <li>Support media literacy initiatives in schools</li>
+          <li>Commission regular AI public perception studies</li>
+        </ul>
+      </div>
+      <div class="rec-card">
+        <h3>For Everyone</h3>
+        <ul>
+          <li>Read AI news from 3+ sources with different perspectives</li>
+          <li>Notice when headlines use fear or optimism language</li>
+          <li>Ask: "What human experience is this article ignoring?"</li>
+          <li>Remember: AI is built by humans, for human purposes</li>
         </ul>
       </div>
     </div>
-    <div style="margin-top:2rem; padding:1.5rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:6px;">
-      <p style="color:rgba(255,255,255,0.7); font-family:Calibri,sans-serif; font-size:0.95rem;">
-        <strong style="color:var(--gold-light);">Media Literacy Matters:</strong> Being aware of bias doesn't mean avoiding news. It means reading critically, seeking diverse perspectives, and understanding how emotional language shapes your thinking. Our Credibility Score (0–100, where Score = 100 − Bias Intensity × 100) ranged from <strong style="color:var(--gold-light);">35 to 65</strong> across sources in our dataset — significant variation showing that outlet choice matters.
+    <div style="margin-top:2rem; padding:1.5rem; background:rgba(200,168,75,0.05); border:1px solid var(--border); border-radius:6px;">
+      <p style="color:var(--steel); font-size:0.9rem;">
+        <strong style="color:var(--gold-light);">Note on Credibility Scores:</strong> Bias intensity varies 2–3× across different news sources in our dataset. Our Credibility Score (Score = 100 − Bias Intensity × 100) ranged from 35 to 65 across outlets — outlet choice matters significantly for balanced AI information.
       </p>
     </div>
   </div>
 </section>
 
-<!-- ── FOOTER ── -->
+<!-- LIMITATIONS -->
+<section id="limitations">
+  <div class="container">
+    <div class="eyebrow">Research Integrity</div>
+    <h2 class="section-title">Limitations & Future Work</h2>
+    <div class="divider"></div>
+    <div class="lim-grid">
+      <div class="lim-card">
+        <h3>Data Constraints</h3>
+        <ul>
+          <li>89-day period (Jun–Sep 2025) — cannot claim long-term trends</li>
+          <li>English-language sources only (cultural bias toward US/UK/Australia)</li>
+          <li>Primarily mainstream news outlets</li>
+          <li>Headlines only — not full article body text</li>
+        </ul>
+      </div>
+      <div class="lim-card">
+        <h3>Methodological Notes</h3>
+        <ul>
+          <li>Bias detection uses AI + keyword matching — directional findings, not clinical diagnosis</li>
+          <li>Thresholds (0.5 for "multiple biases") involve judgment calls</li>
+          <li>Results are robust across reasonable threshold ranges</li>
+          <li>"Invisible Human" detects absence — low coverage may mean "not newsworthy" vs. intentionally ignored</li>
+        </ul>
+      </div>
+      <div class="lim-card">
+        <h3>Future Research</h3>
+        <ul>
+          <li>Extend to 12+ month periods for trend analysis</li>
+          <li>Compare across languages and cultures</li>
+          <li>Track PSI as AI capabilities evolve over time</li>
+          <li>Study reader response to different framing types</li>
+        </ul>
+      </div>
+      <div class="lim-card">
+        <h3>AI Tool Disclosure</h3>
+        <ul>
+          <li>Tool: Claude 3.5 Sonnet (Anthropic)</li>
+          <li>Purpose: Syntax verification, debugging, documentation structure</li>
+          <li>Extent: ~15% of development</li>
+          <li>Human work: 85% — all conceptualization, analysis, interpretation</li>
+          <li>13 prompts fully disclosed in presentation appendix</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer>
-  <p><strong>BiasHounds</strong> — RAISE-26 Research Project</p>
-  <p style="margin-top:0.5rem;">Sadhana Vasanthakumar &amp; Krisha Patel · Dataset: 10,500 AI News Headlines, June–September 2025</p>
+  <div class="f-brand">🐾 BiasHounds</div>
+  <p>RAISE-26 Competition · Rutgers University Bloustein School · April 17, 2026</p>
+  <p style="margin-top:0.4rem;">Sadhana Vasanthakumar (<a href="mailto:sv903@scarletmail.rutgers.edu">sv903@scarletmail.rutgers.edu</a>) · Krisha Patel (<a href="mailto:ksp162@scarletmail.rutgers.edu">ksp162@scarletmail.rutgers.edu</a>)</p>
+  <p style="margin-top:0.4rem;">Dataset: 10,500 AI News Headlines · Jun–Sep 2025 · 3,125 unique sources · All models open-weights · Fully reproducible</p>
 </footer>
 
-<!-- ── CHARTS JS ── -->
 <script>
-  // Shared color palette
-  const C = {
-    navy: '#1b3168', navyLight: '#2d4a8a', gold: '#d4a017', goldLight: '#f0c040',
-    red: '#c0392b', green: '#27ae60', blue: '#2980b9', purple: '#8e44ad',
-    teal: '#0d7377', orange: '#e67e22', gray: '#95a5a6',
-    gridColor: 'rgba(0,0,0,0.06)',
-  };
-  const defaultFont = { family: 'Calibri, sans-serif', size: 12 };
+const C = {
+  gold:'#c8a84b', goldL:'#e8c96a', red:'#b03a2e', green:'#1e7e45',
+  blue:'#2c5282', purple:'#7d3c98', teal:'#0d7377', orange:'#d35400',
+  steel:'#8892a4', gray:'#555e6e', cream:'rgba(250,248,242,0.9)',
+  grid:'rgba(255,255,255,0.05)'
+};
+const font = { family:"'DM Sans', sans-serif", size:11, color:C.cream };
+Chart.defaults.color = C.steel;
 
-  // ── Bias Bar Chart ──
-  new Chart(document.getElementById('biasBarChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Anthropomorphism','Fear Bias','Economic Threat','Techno-Utopianism','Optimism Bias','Control Loss','Moral Panic','Agency Attribution'],
-      datasets: [{
-        label: '% of Headlines',
-        data: [31.4, 24.8, 19.3, 16.7, 14.2, 11.9, 8.6, 6.3],
-        backgroundColor: [C.navyLight, C.red, C.orange, C.blue, C.green, C.purple, C.teal, C.gray],
-        borderRadius: 3,
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { color: C.gridColor }, ticks: { font: defaultFont, callback: v => v+'%' } },
-        y: { grid: { display: false }, ticks: { font: defaultFont } }
-      }
-    }
-  });
-
-  // ── Bias Doughnut ──
-  new Chart(document.getElementById('biasDoughnutChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Multiple biases (2+)','Single bias','No detected bias'],
-      datasets: [{
-        data: [53.9, 16.1, 30.0],
-        backgroundColor: [C.red, C.orange, C.gray],
-        borderWidth: 2, borderColor: '#fff',
-      }]
-    },
-    options: {
-      plugins: {
-        legend: { position: 'bottom', labels: { font: defaultFont, padding: 14 } }
-      },
-      cutout: '58%'
-    }
-  });
-
-  // ── D3 Force-Directed Bias Network ──
-  (function buildBiasNetwork() {
-    const nodeData = [
-      { id: 'Anthropomorphism',   pct: 31.4, color: '#8e44ad',
-        desc: 'The most prevalent bias — treating AI as if it has human desires, emotions, or intentions.',
-        example: '"AI wants to replace workers"',
-        trigger: 'Makes readers feel AI is a rival, not a tool.' },
-      { id: 'Fear Bias',          pct: 24.8, color: '#c0392b',
-        desc: 'Language designed to trigger anxiety and catastrophic thinking about AI.',
-        example: '"AI apocalypse threatens humanity"',
-        trigger: 'Activates fight-or-flight responses in readers.' },
-      { id: 'Economic Threat',    pct: 19.3, color: '#e67e22',
-        desc: 'Framing AI as a direct danger to jobs, wages, and economic stability.',
-        example: '"AI threatens 40% of jobs as automation accelerates"',
-        trigger: 'Taps into financial insecurity and survival instincts.' },
-      { id: 'Techno-Utopianism',  pct: 16.7, color: '#2980b9',
-        desc: 'Portraying AI as the ultimate solution to all of humanity\'s problems.',
-        example: '"AI will cure cancer, end poverty, and solve climate change"',
-        trigger: 'Creates messianic expectations that ignore real trade-offs.' },
-      { id: 'Optimism Bias',      pct: 14.2, color: '#27ae60',
-        desc: 'Uncritical enthusiasm that downplays or ignores the risks of AI.',
-        example: '"AI will solve all our problems"',
-        trigger: 'Suppresses healthy skepticism about AI deployment.' },
-      { id: 'Control Loss',       pct: 11.9, color: '#1b3168',
-        desc: 'Framing AI as beyond human oversight, spiraling outside our ability to govern.',
-        example: '"AI development spiraling out of control"',
-        trigger: 'Creates a sense of helplessness about the technology\'s trajectory.' },
-      { id: 'Moral Panic',        pct:  8.6, color: '#0d7377',
-        desc: 'Framing AI as an existential moral threat to society\'s core values and identity.',
-        example: '"AI corrupts youth and destroys what makes us human"',
-        trigger: 'Mobilizes tribal identity responses against AI.' },
-      { id: 'Agency Attribution', pct:  6.3, color: '#7f8c8d',
-        desc: 'Crediting AI with autonomous decision-making, judgment, and intentionality.',
-        example: '"AI decides who gets hired, promoted, or fired"',
-        trigger: 'Deflects accountability away from human designers and deployers.' },
-    ];
-
-    const linkData = [
-      { source: 'Techno-Utopianism', target: 'Control Loss',     r: 0.85,
-        meaning: '"AI will save us" headlines routinely pair with "We can\'t control AI" messaging — readers absorb hope and helplessness at once.' },
-      { source: 'Economic Threat',   target: 'Fear Bias',         r: 0.72,
-        meaning: 'When jobs are mentioned, fear language reliably follows — economic anxiety and catastrophic framing are nearly inseparable.' },
-      { source: 'Optimism Bias',     target: 'Anthropomorphism',  r: 0.68,
-        meaning: 'Treating AI as human pairs with uncritical praise — personifying AI makes it easier to hype.' },
-      { source: 'Fear Bias',         target: 'Moral Panic',       r: 0.61,
-        meaning: 'Crisis-level fear language amplifies moral panic framing — both signal that AI threatens society\'s foundations.' },
-      { source: 'Control Loss',      target: 'Agency Attribution',r: 0.58,
-        meaning: 'Headlines attributing independent agency to AI also frame it as beyond human control — agency and uncontrollability travel together.' },
-      { source: 'Anthropomorphism',  target: 'Agency Attribution',r: 0.55,
-        meaning: 'Treating AI as human and granting it autonomous decision-making co-occur — anthropomorphism enables agency attribution.' },
-      { source: 'Techno-Utopianism', target: 'Optimism Bias',     r: 0.52,
-        meaning: '"AI will save humanity" framing pairs with uncritical optimism — both suppress balanced risk assessment.' },
-      { source: 'Fear Bias',         target: 'Control Loss',      r: 0.49,
-        meaning: 'Fear language and loss-of-control narratives reinforce each other, amplifying reader anxiety.' },
-    ];
-
-    const container = document.getElementById('biasNetworkSvg');
-    const W = container.clientWidth || 700;
-    const H = 500;
-    const tooltip = document.getElementById('networkTooltip');
-
-    // Build legend
-    const legend = document.getElementById('networkLegend');
-    nodeData.forEach(n => {
-      const item = document.createElement('div');
-      item.className = 'network-legend-item';
-      item.innerHTML = `<div class="network-legend-swatch" style="background:${n.color}"></div><span>${n.id} (${n.pct}%)</span>`;
-      legend.appendChild(item);
-    });
-
-    const svg = d3.select(container).append('svg')
-      .attr('viewBox', `0 0 ${W} ${H}`)
-      .attr('preserveAspectRatio', 'xMidYMid meet');
-
-    // Defs: arrowhead (unused but keeps structure clean)
-    const defs = svg.append('defs');
-
-    // Scales
-    const rScale = d3.scaleSqrt().domain([0, 35]).range([0, 46]);
-    const strokeScale = d3.scaleLinear().domain([0.4, 0.9]).range([2, 12]).clamp(true);
-
-    // Deep-clone node/link data so D3 sim can mutate
-    const nodes = nodeData.map(d => ({ ...d }));
-    const links = linkData.map(d => ({ ...d }));
-
-    // Simulation
-    const sim = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links).id(d => d.id).distance(d => 240 - d.r * 100))
-      .force('charge', d3.forceManyBody().strength(-520))
-      .force('center', d3.forceCenter(W / 2, H / 2))
-      .force('collide', d3.forceCollide().radius(d => rScale(d.pct) + 14));
-
-    // Draw links
-    const link = svg.append('g').attr('class', 'links')
-      .selectAll('line')
-      .data(links)
-      .join('line')
-        .attr('class', 'network-link')
-        .attr('stroke', '#b0b8d0')
-        .attr('stroke-width', d => strokeScale(d.r))
-        .attr('stroke-opacity', 0.65)
-        .on('mousemove', function(event, d) {
-          d3.select(this).attr('stroke', '#d4a017').attr('stroke-opacity', 1);
-          const rect = container.getBoundingClientRect();
-          const x = event.clientX - rect.left;
-          const y = event.clientY - rect.top;
-          tooltip.innerHTML = `
-            <div class="tt-title">${d.source.id} ↔ ${d.target.id}</div>
-            <div class="tt-r">Correlation: r = ${d.r.toFixed(2)}</div>
-            <div style="margin-top:6px;font-size:12px;color:rgba(255,255,255,0.85);">${d.meaning}</div>`;
-          tooltip.style.opacity = '1';
-          tooltip.style.left = (x + 16) + 'px';
-          tooltip.style.top  = (y - 10) + 'px';
-        })
-        .on('mouseleave', function() {
-          d3.select(this).attr('stroke', '#b0b8d0').attr('stroke-opacity', 0.65);
-          tooltip.style.opacity = '0';
-        });
-
-    // Draw nodes
-    const node = svg.append('g').attr('class', 'nodes')
-      .selectAll('g')
-      .data(nodes)
-      .join('g')
-        .attr('class', 'network-node')
-        .call(d3.drag()
-          .on('start', (event, d) => { if (!event.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
-          .on('drag',  (event, d) => { d.fx = event.x; d.fy = event.y; })
-          .on('end',   (event, d) => { if (!event.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
-        )
-        .on('mousemove', function(event, d) {
-          d3.select(this).select('circle').attr('stroke', '#d4a017').attr('stroke-opacity', 1);
-          const rect = container.getBoundingClientRect();
-          const x = event.clientX - rect.left;
-          const y = event.clientY - rect.top;
-          tooltip.innerHTML = `
-            <div class="tt-title">${d.id}</div>
-            <div class="tt-r">Found in ${d.pct}% of headlines</div>
-            <div style="margin-top:6px;font-size:12px;color:rgba(255,255,255,0.85);">${d.desc}</div>
-            <div style="margin-top:6px;font-size:11px;color:rgba(255,255,255,0.55);font-style:italic;">e.g. ${d.example}</div>
-            <div style="margin-top:5px;font-size:11px;color:${d.color === '#c0392b' ? '#ff9999' : '#a8d8a8'};">⚡ ${d.trigger}</div>`;
-          tooltip.style.opacity = '1';
-          const tipW = 280;
-          tooltip.style.left = (x + 16 + tipW > W ? x - tipW - 10 : x + 16) + 'px';
-          tooltip.style.top  = (y - 10) + 'px';
-        })
-        .on('mouseleave', function() {
-          d3.select(this).select('circle').attr('stroke', 'white').attr('stroke-opacity', 0.9);
-          tooltip.style.opacity = '0';
-        });
-
-    node.append('circle')
-      .attr('r', d => rScale(d.pct))
-      .attr('fill', d => d.color)
-      .attr('fill-opacity', 0.88)
-      .attr('stroke', 'white')
-      .attr('stroke-opacity', 0.9);
-
-    // Multi-line label with tspan wrapping
-    node.append('text')
-      .each(function(d) {
-        const words = d.id.split(' ');
-        const el = d3.select(this);
-        if (words.length <= 2) {
-          el.append('tspan').attr('x', 0).attr('dy', '0.35em').text(d.id);
-        } else {
-          // Split into two lines at midpoint
-          const mid = Math.ceil(words.length / 2);
-          el.append('tspan').attr('x', 0).attr('dy', '-0.5em').text(words.slice(0, mid).join(' '));
-          el.append('tspan').attr('x', 0).attr('dy', '1.1em').text(words.slice(mid).join(' '));
-        }
-      })
-      .attr('font-size', d => d.pct > 20 ? '11px' : '10px')
-      .attr('fill', 'white')
-      .attr('font-family', 'Calibri, sans-serif')
-      .attr('pointer-events', 'none');
-
-    // Tick
-    sim.on('tick', () => {
-      const pad = 50;
-      link
-        .attr('x1', d => Math.max(pad, Math.min(W - pad, d.source.x)))
-        .attr('y1', d => Math.max(pad, Math.min(H - pad, d.source.y)))
-        .attr('x2', d => Math.max(pad, Math.min(W - pad, d.target.x)))
-        .attr('y2', d => Math.max(pad, Math.min(H - pad, d.target.y)));
-      node.attr('transform', d =>
-        `translate(${Math.max(pad, Math.min(W - pad, d.x))},${Math.max(pad, Math.min(H - pad, d.y))})`);
-    });
-
-    // Correlation label on links (shown at midpoint)
-    const linkLabel = svg.append('g').attr('class', 'link-labels')
-      .selectAll('text')
-      .data(links)
-      .join('text')
-        .attr('font-family', 'Calibri, sans-serif')
-        .attr('font-size', '10px')
-        .attr('fill', '#5a6a8a')
-        .attr('text-anchor', 'middle')
-        .attr('pointer-events', 'none')
-        .text(d => `r=${d.r}`);
-
-    sim.on('tick.labels', () => {
-      linkLabel
-        .attr('x', d => (d.source.x + d.target.x) / 2)
-        .attr('y', d => (d.source.y + d.target.y) / 2 - 4);
-    });
-  })();
-
-  // ── Agency Pie ──
-  new Chart(document.getElementById('agencyPieChart'), {
-    type: 'pie',
-    data: {
-      labels: ['AI as Independent Actor (12.7%)', 'Human Controls AI (5.5%)', 'Neutral / No Agency (81.8%)'],
-      datasets: [{
-        data: [12.7, 5.5, 81.8],
-        backgroundColor: [C.red, C.green, C.gray],
-        borderWidth: 2, borderColor: '#fff',
-      }]
-    },
-    options: {
-      plugins: {
-        legend: { position: 'bottom', labels: { font: defaultFont, padding: 12 } }
-      }
-    }
-  });
-
-  // ── PSI Gauge (bar) ──
-  new Chart(document.getElementById('psiGaugeChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Human Control Frame', 'AI Agency Frame'],
-      datasets: [{
-        label: 'Headlines',
-        data: [574, 1332],
-        backgroundColor: [C.green, C.red],
-        borderRadius: 4,
-      }]
-    },
-    options: {
-      plugins: {
-        legend: { display: false },
-        title: {
-          display: true,
-          text: 'PSI = 145.5 (AI agency 1.45× > human framing)',
-          font: { ...defaultFont, size: 11 }, color: C.navy
-        }
-      },
-      scales: {
-        y: { grid: { color: C.gridColor }, ticks: { font: defaultFont } },
-        x: { grid: { display: false }, ticks: { font: defaultFont } }
-      }
-    }
-  });
-
-  // ── AAI Correlation ──
-  new Chart(document.getElementById('aaCorrelationChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Fear Bias','Economic Threat','Moral Panic','Bias Intensity','Control Loss','Techno-Utopianism','Agency Attribution','Optimism Bias','Anthropomorphism'],
-      datasets: [{
-        label: 'Correlation with AAI',
-        data: [0.456, 0.285, 0.249, 0.229, 0.173, 0.131, 0.111, 0.097, 0.074],
-        backgroundColor: [
-          C.red, '#e74c3c', '#e67e22', '#e67e22',
-          C.orange, C.gray, C.gray, C.gray, C.gray
-        ],
-        borderRadius: 3,
-      }]
-    },
-    options: {
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { min: 0, max: 0.55, grid: { color: C.gridColor }, ticks: { font: defaultFont } },
-        x: { grid: { display: false }, ticks: { font: defaultFont, maxRotation: 35 } }
-      }
-    }
-  });
-
-  // ── Big Picture Correlations Matrix ──
-  new Chart(document.getElementById('corrMatrix'), {
-    type: 'bar',
-    data: {
-      labels: [
-        'Bias Intensity ↔ Anxiety (r=0.64)',
-        'Econ Threat ↔ Work/Jobs (r=0.78)',
-        'Fear Language ↔ Neg. Sentiment (r=0.71)',
-        'PSI ↔ Anxiety (r=0.12) ← Surprise!',
-        'Optimism ↔ Anxiety (r=−0.23)'
-      ],
-      datasets: [{
-        label: 'Correlation',
-        data: [0.64, 0.78, 0.71, 0.12, -0.23],
-        backgroundColor: ctx => {
-          const v = ctx.raw;
-          if (v < 0) return C.green;
-          if (v < 0.2) return C.gray;
-          if (v < 0.5) return C.orange;
-          return C.red;
-        },
-        borderRadius: 4,
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { min: -0.4, max: 0.9, grid: { color: C.gridColor }, ticks: { font: defaultFont } },
-        y: { grid: { display: false }, ticks: { font: defaultFont } }
-      }
-    }
-  });
-
-  // ── Invisible Human Chart ──
-  new Chart(document.getElementById('invisibleHumanChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Artistic Process','Ethics/Accountability','Work & Employment','Community & Ritual','Intimacy & Relationships','Grief & Caregiving','Embodied Experience','Spirituality & Meaning'],
-      datasets: [{
-        label: '% of Headlines',
-        data: [24.30, 8.90, 35.20, 3.40, 1.71, 1.14, 0.80, 0.57],
-        backgroundColor: ctx => {
-          const v = ctx.raw;
-          if (v >= 20) return C.green;
-          if (v >= 5) return C.blue;
-          if (v >= 2) return C.orange;
-          return C.red;
-        },
-        borderRadius: 3,
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% of headlines` } }
-      },
-      scales: {
-        x: { grid: { color: C.gridColor }, ticks: { font: defaultFont, callback: v => v+'%' } },
-        y: { grid: { display: false }, ticks: { font: defaultFont } }
-      }
-    }
-  });
-
-  // ── Tab switching ──
-  function switchTab(id, group) {
-    // Find all panels and buttons in this group
-    const allPanels = document.querySelectorAll(`#${group === 'bias' ? 'bias-dist,#bias-network,#bias-examples' : 'aai-corr,#aai-examples'}`.split(',').map(s => s.startsWith('#') ? s : '#'+s).join(','));
-    allPanels.forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-
-    // Find buttons — look for nearest tabs container
-    const activePanel = document.getElementById(id);
-    const tabsContainer = activePanel.parentElement.querySelector('.tabs');
-    if (tabsContainer) {
-      tabsContainer.querySelectorAll('.tab-btn').forEach((btn, i) => {
-        const panelIds = group === 'bias'
-          ? ['bias-dist','bias-network','bias-examples']
-          : ['aai-corr','aai-examples'];
-        btn.classList.toggle('active', panelIds[i] === id);
-      });
+// Bias Bar
+new Chart(document.getElementById('biasBar'),{
+  type:'bar',
+  data:{
+    labels:['Anthropomorphism','Fear Bias','Economic Threat','Techno-Utopianism','Optimism Bias','Control Loss','Moral Panic','Agency Attribution'],
+    datasets:[{
+      data:[31.4,24.8,19.3,16.7,14.2,11.9,8.6,6.3],
+      backgroundColor:['#7d3c98','#b03a2e','#d35400','#2c5282','#1e7e45','#1b3168','#0d7377','#555e6e'],
+      borderRadius:3,borderSkipped:false
+    }]
+  },
+  options:{
+    indexAxis:'y',responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{color:C.grid},ticks:{font,callback:v=>v+'%'},border:{display:false}},
+      y:{grid:{display:false},ticks:{font,color:C.cream}}
     }
   }
+});
 
-  // Polyfill the selector approach
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const siblings = this.parentElement.querySelectorAll('.tab-btn');
-      siblings.forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-    });
+// Bias Doughnut
+new Chart(document.getElementById('biasDoughnut'),{
+  type:'doughnut',
+  data:{
+    labels:['Multiple biases (2+)','Single bias','No bias detected'],
+    datasets:[{data:[53.9,16.1,30.0],backgroundColor:['#b03a2e','#d35400',C.gray],borderWidth:2,borderColor:'#0d0f14'}]
+  },
+  options:{
+    plugins:{legend:{position:'bottom',labels:{font,color:C.steel,padding:14}}},
+    cutout:'58%'
+  }
+});
+
+// Agency Pie
+new Chart(document.getElementById('agencyPie'),{
+  type:'pie',
+  data:{
+    labels:['AI acts independently (12.7%)','Humans control AI (5.5%)','Neutral (81.8%)'],
+    datasets:[{data:[12.7,5.5,81.8],backgroundColor:['#b03a2e','#1e7e45',C.gray],borderWidth:2,borderColor:'#0d0f14'}]
+  },
+  options:{plugins:{legend:{position:'bottom',labels:{font,color:C.steel,padding:12}}}}
+});
+
+// PSI Chart
+new Chart(document.getElementById('psiChart'),{
+  type:'line',
+  data:{
+    labels:['Jun 1','Jun 15','Jun 29','Jul 13','Jul 27','Aug 10','Aug 24','Sep 7'],
+    datasets:[{
+      label:'PSI',
+      data:[157,152,150,143,127,128,142,147],
+      borderColor:C.goldL,backgroundColor:'rgba(200,168,75,0.08)',
+      tension:0.4,pointRadius:4,pointBackgroundColor:C.gold,fill:true
+    },{
+      label:'Balance (100)',
+      data:[100,100,100,100,100,100,100,100],
+      borderColor:'rgba(255,255,255,0.2)',borderDash:[5,5],pointRadius:0,fill:false
+    }]
+  },
+  options:{
+    plugins:{legend:{labels:{font,color:C.steel}}},
+    scales:{
+      y:{min:80,max:180,grid:{color:C.grid},ticks:{font}},
+      x:{grid:{display:false},ticks:{font}}
+    }
+  }
+});
+
+// AAI Correlation
+new Chart(document.getElementById('aaCorr'),{
+  type:'bar',
+  data:{
+    labels:['Fear Bias','Economic Threat','Moral Panic','Bias Intensity','Control Loss','Techno-Utopianism','Optimism Bias','Anthropomorphism'],
+    datasets:[{
+      data:[0.456,0.285,0.249,0.229,0.173,0.131,0.097,0.074],
+      backgroundColor:['#b03a2e','#c0392b','#d35400','#d35400','#e67e22',C.gray,C.gray,C.gray],
+      borderRadius:3
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}},
+    scales:{
+      y:{min:0,max:0.55,grid:{color:C.grid},ticks:{font}},
+      x:{grid:{display:false},ticks:{font,maxRotation:30}}
+    }
+  }
+});
+
+// Invisible Human
+new Chart(document.getElementById('invisibleHuman'),{
+  type:'bar',
+  data:{
+    labels:['Work & Employment','Artistic Process','Ethics/Accountability','Community & Ritual','Intimacy & Relationships','Grief & Caregiving','Embodied Experience','Spirituality & Meaning'],
+    datasets:[{
+      data:[35.20,24.30,8.90,3.40,1.71,1.14,0.80,0.57],
+      backgroundColor:ctx=>{const v=ctx.raw;return v>=20?C.goldL:v>=5?C.blue:v>=2?C.orange:'#b03a2e';},
+      borderRadius:3
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{color:C.grid},ticks:{font,callback:v=>v+'%'}},
+      y:{grid:{display:false},ticks:{font,color:C.cream}}
+    }
+  }
+});
+
+// ── D3 Network ──
+(function(){
+  const nodes=[
+    {id:'Anthropomorphism',pct:31.4,color:'#7d3c98',desc:'Treating AI as if it has human desires, emotions, or intentions.',example:'"AI wants to replace workers"'},
+    {id:'Fear Bias',pct:24.8,color:'#b03a2e',desc:'Language that triggers anxiety and catastrophic thinking about AI.',example:'"AI apocalypse threatens humanity"'},
+    {id:'Economic Threat',pct:19.3,color:'#d35400',desc:'Framing AI as a direct danger to jobs, wages, and economic stability.',example:'"AI threatens 40% of jobs"'},
+    {id:'Techno-Utopianism',pct:16.7,color:'#2c5282',desc:'Portraying AI as the ultimate solution to humanity\'s problems.',example:'"AI will cure cancer and end poverty"'},
+    {id:'Optimism Bias',pct:14.2,color:'#1e7e45',desc:'Uncritical enthusiasm that downplays risks of AI.',example:'"AI will solve all our problems"'},
+    {id:'Control Loss',pct:11.9,color:'#1b3168',desc:'Framing AI as beyond human oversight and governance.',example:'"AI development spiraling out of control"'},
+    {id:'Moral Panic',pct:8.6,color:'#0d7377',desc:'Framing AI as an existential moral threat to society\'s values.',example:'"AI corrupts youth and destroys humanity"'},
+    {id:'Agency Attribution',pct:6.3,color:'#555e6e',desc:'Crediting AI with autonomous decision-making and intentionality.',example:'"AI decides who gets hired or fired"'}
+  ];
+  const links=[
+    {source:'Techno-Utopianism',target:'Control Loss',r:0.85,meaning:'Hope + helplessness — the most powerful emotional cocktail in AI headlines.'},
+    {source:'Economic Threat',target:'Fear Bias',r:0.72,meaning:'Job mentions and fear language are nearly inseparable in AI coverage.'},
+    {source:'Optimism Bias',target:'Anthropomorphism',r:0.68,meaning:'Treating AI as human makes it easier to uncritically praise it.'},
+    {source:'Fear Bias',target:'Moral Panic',r:0.61,meaning:'Crisis-level fear amplifies moral panic — both signal AI threatens society\'s foundation.'},
+    {source:'Control Loss',target:'Agency Attribution',r:0.58,meaning:'Agency and uncontrollability travel together in coverage.'},
+    {source:'Anthropomorphism',target:'Agency Attribution',r:0.55,meaning:'Personifying AI enables attributing independent decisions to it.'},
+    {source:'Techno-Utopianism',target:'Optimism Bias',r:0.52,meaning:'Messianic AI framing pairs with uncritical optimism.'},
+    {source:'Fear Bias',target:'Control Loss',r:0.49,meaning:'Fear language and loss-of-control narratives reinforce each other.'}
+  ];
+
+  const container = document.getElementById('netSvg');
+  const W = container.clientWidth || 720, H = 480;
+  const tooltip = document.getElementById('netTooltip');
+  const rSc = d3.scaleSqrt().domain([0,35]).range([0,44]);
+  const wSc = d3.scaleLinear().domain([0.4,0.9]).range([2,11]).clamp(true);
+
+  const ns = nodes.map(d=>({...d}));
+  const ls = links.map(d=>({...d}));
+
+  const sim = d3.forceSimulation(ns)
+    .force('link',d3.forceLink(ls).id(d=>d.id).distance(d=>230-d.r*95))
+    .force('charge',d3.forceManyBody().strength(-500))
+    .force('center',d3.forceCenter(W/2,H/2))
+    .force('collide',d3.forceCollide().radius(d=>rSc(d.pct)+12));
+
+  const svg = d3.select(container).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('preserveAspectRatio','xMidYMid meet');
+
+  const link = svg.append('g').selectAll('line').data(ls).join('line')
+    .attr('stroke','rgba(200,168,75,0.25)').attr('stroke-width',d=>wSc(d.r))
+    .on('mousemove',function(ev,d){
+      d3.select(this).attr('stroke',C.goldL).attr('stroke-opacity',1);
+      const rc = container.getBoundingClientRect();
+      tooltip.innerHTML=`<div class="nt-title">${d.source.id} ↔ ${d.target.id}</div><div style="color:${C.steel};font-size:11px;">r = ${d.r}</div><div style="margin-top:6px;font-size:11px;color:rgba(250,248,242,0.8);">${d.meaning}</div>`;
+      tooltip.style.opacity='1'; tooltip.style.left=(ev.clientX-rc.left+12)+'px'; tooltip.style.top=(ev.clientY-rc.top-8)+'px';
+    })
+    .on('mouseleave',function(){d3.select(this).attr('stroke','rgba(200,168,75,0.25)').attr('stroke-opacity',1);tooltip.style.opacity='0';});
+
+  const rLabel = svg.append('g').selectAll('text').data(ls).join('text')
+    .attr('font-family','Space Mono,monospace').attr('font-size','9px').attr('fill',C.steel)
+    .attr('text-anchor','middle').attr('pointer-events','none').text(d=>`r=${d.r}`);
+
+  const node = svg.append('g').selectAll('g').data(ns).join('g')
+    .call(d3.drag()
+      .on('start',(ev,d)=>{if(!ev.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y;})
+      .on('drag',(ev,d)=>{d.fx=ev.x;d.fy=ev.y;})
+      .on('end',(ev,d)=>{if(!ev.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}))
+    .on('mousemove',function(ev,d){
+      d3.select(this).select('circle').attr('stroke',C.goldL);
+      const rc=container.getBoundingClientRect();
+      tooltip.innerHTML=`<div class="nt-title">${d.id}</div><div style="color:${C.steel};font-size:11px;">${d.pct}% of headlines</div><div style="margin-top:6px;font-size:11px;color:rgba(250,248,242,0.8);">${d.desc}</div><div style="margin-top:5px;font-size:10px;color:${C.steel};font-style:italic;">${d.example}</div>`;
+      tooltip.style.opacity='1'; tooltip.style.left=(ev.clientX-rc.left+12)+'px'; tooltip.style.top=(ev.clientY-rc.top-8)+'px';
+    })
+    .on('mouseleave',function(){d3.select(this).select('circle').attr('stroke','rgba(255,255,255,0.2)');tooltip.style.opacity='0';});
+
+  node.append('circle').attr('r',d=>rSc(d.pct)).attr('fill',d=>d.color).attr('fill-opacity',0.85)
+    .attr('stroke','rgba(255,255,255,0.2)').attr('stroke-width',1.5);
+
+  node.append('text').each(function(d){
+    const w=d.id.split(' '), el=d3.select(this);
+    if(w.length<=2){el.append('tspan').attr('x',0).attr('dy','0.35em').text(d.id);}
+    else{const m=Math.ceil(w.length/2);el.append('tspan').attr('x',0).attr('dy','-0.4em').text(w.slice(0,m).join(' '));el.append('tspan').attr('x',0).attr('dy','1.1em').text(w.slice(m).join(' '));}
+  }).attr('font-family',"'DM Sans',sans-serif").attr('font-size',d=>d.pct>20?'10px':'9px')
+    .attr('fill','white').attr('text-anchor','middle').attr('pointer-events','none');
+
+  sim.on('tick',()=>{
+    const p=48;
+    link.attr('x1',d=>Math.max(p,Math.min(W-p,d.source.x))).attr('y1',d=>Math.max(p,Math.min(H-p,d.source.y)))
+        .attr('x2',d=>Math.max(p,Math.min(W-p,d.target.x))).attr('y2',d=>Math.max(p,Math.min(H-p,d.target.y)));
+    node.attr('transform',d=>`translate(${Math.max(p,Math.min(W-p,d.x))},${Math.max(p,Math.min(H-p,d.y))})`);
+    rLabel.attr('x',d=>(d.source.x+d.target.x)/2).attr('y',d=>(d.source.y+d.target.y)/2-3);
   });
-</script>
+})();
 
+// Tab switching
+function switchTab(id, group) {
+  const panels = {
+    b: ['b-dist','b-net','b-ex'],
+    a: ['a-corr','a-ex']
+  }[group];
+  panels.forEach(p => {
+    const el = document.getElementById(p);
+    if(el) el.classList.remove('active');
+  });
+  document.getElementById(id).classList.add('active');
+  // update buttons
+  const activeEl = document.getElementById(id);
+  const tabsCont = activeEl.closest('[style]') || activeEl.parentElement;
+  tabsCont.querySelectorAll('.tab-btn').forEach((btn,i) => {
+    btn.classList.toggle('active', panels[i] === id);
+  });
+}
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    this.closest('.tabs').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
 </body>
 </html>
